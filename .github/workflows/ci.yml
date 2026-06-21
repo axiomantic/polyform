@@ -15,7 +15,7 @@ jobs:
         #   - macos-latest
         nim-version: [stable, "2.2.6", devel]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: jiro4989/setup-nim-action@v2
         with:
           nim-version: ${{ matrix.nim-version }}
