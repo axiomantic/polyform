@@ -37,3 +37,35 @@ jobs:
       - name: Test
         run: nimble test
         continue-on-error: ${{ matrix.nim-version == 'devel' }}
+
+  fixture-matrix:
+    name: Fixture (${{ matrix.flavor }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [pure_nim, nim_ts_wasm, nim_python_wheel, headerkit_binding]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          parent-nim-install-directory: ${{ runner.temp }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install nph and tools
+        run: |
+          nimble install -y nph@0.7.0
+          echo "$HOME/.nimble/bin" >> $GITHUB_PATH
+      - name: Verify fixture ${{ matrix.flavor }}
+        run: bash tests/test_fixtures.sh ${{ matrix.flavor }} all
+

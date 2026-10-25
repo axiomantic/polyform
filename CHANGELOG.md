@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Polyform root fixture matrix test runner (tests/test_fixtures.sh), root justfile fixture recipes, and GitHub Actions CI fixture matrix verification for pure_nim, nim_ts_wasm, nim_python_wheel, and headerkit_binding (Task 3.2)
 - Root Copier megatemplate specification (`copier.yml`) supporting `pure_nim`, `nim_ts_wasm`, `nim_python_wheel`, and `headerkit_binding`.
 - Template payload directory (`template/`) with `.copier-answers.yml.jinja` for upstream continuous upgrade tracking.
 - Compiler build configuration (`template/nim.cfg`) with deterministic ORC memory management and threading.

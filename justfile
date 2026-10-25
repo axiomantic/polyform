@@ -18,6 +18,18 @@ docs:
 build:
     nimble build -d:release
 
+# Run fixture test suite across flavors (flavor: "all" | "pure_nim" | "nim_ts_wasm" | "nim_python_wheel" | "headerkit_binding")
+test-fixtures flavor="all":
+    bash tests/test_fixtures.sh {{flavor}} test
+
+# Run fixture linters across flavors
+lint-fixtures flavor="all":
+    bash tests/test_fixtures.sh {{flavor}} lint
+
+# Run full matrix fixture verification (render, lint, test) across flavors
+fixtures flavor="all":
+    bash tests/test_fixtures.sh {{flavor}} all
+
 # Manual fallback for template-cleanup (find/replace project_name -> kebab name).
 # Cross-platform: uses python3 for find/replace (GNU vs BSD sed differences are avoided).
 rename new_name:
