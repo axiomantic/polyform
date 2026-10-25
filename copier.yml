@@ -1,0 +1,145 @@
+_subdirectory: template
+_answers_file: .copier-answers.yml
+_min_copier_version: "9.0.0"
+
+# ----------------------------------------------------------------------
+# 1. Project Identity & Metadata
+# ----------------------------------------------------------------------
+project_name:
+  type: str
+  help: "Human-readable project title or slug (e.g. My Fast Math or fast-math)"
+  default: "my-project"
+  validator: >-
+    {% if not project_name | regex_search('^[a-zA-Z0-9_ -]+$') %}
+    Project name must contain only letters, numbers, spaces, underscores, or dashes.
+    {% endif %}
+
+repo_name:
+  type: str
+  help: "GitHub repository slug (kebab-case, e.g. fast-math)"
+  default: "{{ project_name | lower | replace(' ', '-') | replace('_', '-') }}"
+  validator: >-
+    {% if not repo_name | regex_search('^[a-z0-9][a-z0-9-]+$') %}
+    Repository name must be kebab-case lowercase alphanumeric.
+    {% endif %}
+
+package_name:
+  type: str
+  help: "Nim / Python / C-symbol package identifier (snake_case, e.g. fast_math)"
+  default: "{{ repo_name | replace('-', '_') }}"
+  validator: >-
+    {% if not package_name | regex_search('^[a-z][a-z0-9_]+$') %}
+    Package identifier must be snake_case starting with a lowercase letter.
+    {% endif %}
+
+description:
+  type: str
+  help: "Concise summary of project purpose"
+  default: "Production-grade project built with Axiomantic standards."
+
+author_name:
+  type: str
+  help: "Author or organization maintainer name"
+  default: "Axiomantic Maintainers"
+
+author_email:
+  type: str
+  help: "Author contact email"
+  default: "maintainers@axiomantic.org"
+
+github_owner:
+  type: str
+  help: "GitHub user or organization handle"
+  default: "axiomantic"
+
+# ----------------------------------------------------------------------
+# 2. Flavor Topology Selection
+# ----------------------------------------------------------------------
+flavor:
+  type: str
+  help: "Select the architectural flavor matrix for the project"
+  choices:
+    "Pure Nim Library / CLI (Single or multi-file, Starlight/Vitepress docs, AST docgen)": "pure_nim"
+    "Nim + TypeScript WebAssembly Bridge (ESM, npm packaging, Vite, Vitest)": "nim_ts_wasm"
+    "Nim Native Python Wheel (nimpy/C-ABI, scikit-build-core, cibuildwheel)": "nim_python_wheel"
+    "HeaderKit C/C++ Binding Extension (headerkit.toml, FFI wrapper, CopierBYOScaffolder)": "headerkit_binding"
+  default: "pure_nim"
+
+# ----------------------------------------------------------------------
+# 3. Documentation Engine Selection
+# ----------------------------------------------------------------------
+docs_engine:
+  type: str
+  help: "Documentation portal engine"
+  choices:
+    "Astro Starlight (Axiomantic standard with automated AST docgen and Mermaid)": "starlight"
+    "VitePress (Fast Markdown docs with Vite integration)": "vitepress"
+    "None (Skip documentation site)": "none"
+  default: "starlight"
+
+# ----------------------------------------------------------------------
+# 4. Ecosystem Features & Review Tooling
+# ----------------------------------------------------------------------
+enable_momus_review:
+  type: bool
+  help: "Include Axiomantic Momus AI PR review workflow (.github/workflows/momus.yml)?"
+  default: true
+
+license:
+  type: str
+  help: "Software license"
+  choices:
+    - "MIT"
+    - "Apache-2.0"
+    - "BSD-3-Clause"
+    - "Unlicense"
+  default: "MIT"
+
+# ----------------------------------------------------------------------
+# 5. Conditional File Exclusion Rules
+# ----------------------------------------------------------------------
+_exclude:
+  # Universal hygiene
+  - ".git"
+  - ".DS_Store"
+  - "*.pyc"
+  - "__pycache__"
+
+  # Flavor B: nim_ts_wasm exclusions
+  - "{% if flavor != 'nim_ts_wasm' %}package.json{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}package-lock.json{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}tsconfig.json{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}vitest.config.ts{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}ts/**{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}scripts/compile_wasm.sh{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}tests/test_ts_bridge.ts{% endif %}"
+
+  # Flavor C: nim_python_wheel exclusions
+  - "{% if flavor != 'nim_python_wheel' %}pyproject.toml{% endif %}"
+  - "{% if flavor != 'nim_python_wheel' %}CMakeLists.txt{% endif %}"
+  - "{% if flavor != 'nim_python_wheel' %}src_py/**{% endif %}"
+  - "{% if flavor != 'nim_python_wheel' %}tests_py/**{% endif %}"
+  - "{% if flavor != 'nim_python_wheel' %}.github/workflows/cibuildwheel.yml{% endif %}"
+
+  # Flavor D: headerkit_binding exclusions
+  - "{% if flavor != 'headerkit_binding' %}headerkit.toml{% endif %}"
+  - "{% if flavor != 'headerkit_binding' %}include/**{% endif %}"
+  - "{% if flavor != 'headerkit_binding' %}scripts/generate_bindings.py{% endif %}"
+  - "{% if flavor != 'headerkit_binding' %}tests/test_tripwire.nim{% endif %}"
+
+  # Documentation engine exclusions
+  - "{% if docs_engine == 'none' %}docs/**{% endif %}"
+  - "{% if docs_engine == 'none' %}tools/docgen.nim{% endif %}"
+  - "{% if docs_engine == 'none' %}.github/workflows/docs.yml{% endif %}"
+  - "{% if docs_engine != 'starlight' %}docs/astro.config.mjs{% endif %}"
+  - "{% if docs_engine != 'vitepress' %}docs/.vitepress/**{% endif %}"
+
+  # Momus review exclusion
+  - "{% if not enable_momus_review %}.github/workflows/momus.yml{% endif %}"
+
+# ----------------------------------------------------------------------
+# 6. Post-Copy Lifecycle Tasks
+# ----------------------------------------------------------------------
+_tasks:
+  - "test -d .git || git init -q"
+  - "echo 'Polyform: Initialized {{ repo_name }} ({{ flavor }}) successfully.'"
