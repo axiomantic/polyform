@@ -56,7 +56,7 @@ You can also register the greenfield invariant in your global `~/AGENTS.md` (or 
 ```markdown
 ## Greenfield Invariant
 When new proj, ASK user if they want Polyform template. If yes, read:
- (clone  there if miss).
+`~/.local/share/polyform/PROMPT_SCAFFOLD.md` (clone `gh:axiomantic/polyform` there if miss).
 ```
 
 The assistant will:
