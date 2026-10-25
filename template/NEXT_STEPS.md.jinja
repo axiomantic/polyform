@@ -1,0 +1,127 @@
+# Next Steps for {{ project_name }}
+
+Welcome to your newly scaffolded project! This repository was generated with **Polyform** using the `{{ flavor }}` architectural flavor.
+
+Follow this checklist to complete project onboarding and configure CI/CD.
+
+---
+
+## 1. Initial Local Setup & Verification
+
+Run the canonical `just` recipes to verify your development environment:
+
+```bash
+# 1. Install toolchain dependencies
+just setup
+
+# 2. Run test suite
+just test
+
+# 3. Check formatting and linter
+just lint
+```
+
+{%- if docs_engine == 'starlight' %}
+---
+
+## 2. Documentation Portal (Astro Starlight)
+
+Your documentation site is powered by Astro Starlight and located in `docs/`:
+
+```bash
+# Start local docs development server with hot-reload
+just docs
+
+# Verify production build & API documentation extraction
+just docs-build
+```
+
+### GitHub Pages Setup
+1. Push your repository to GitHub: `git push -u origin main`
+2. Navigate to **Settings > Pages**.
+3. Under **Build and deployment > Source**, select **GitHub Actions**.
+4. The `.github/workflows/docs.yml` workflow will automatically deploy your documentation upon push to `main`.
+{%- endif %}
+
+---
+
+## 3. GitHub Secrets & CI Automation
+
+{%- if enable_momus_review %}
+### Momus AI PR Review (`.github/workflows/momus.yml`)
+Momus provides automated, noise-filtered AI code reviews on pull requests using `{{ momus_model }}` via `{{ momus_base_url }}`.
+
+- **Required Secret**:
+  - Go to **Settings > Secrets and variables > Actions > New repository secret**.
+  - Name: `LLM_API_KEY`
+  - Value: Your OpenRouter (or provider-specific) API key.
+- **Optional GitHub App Integration**:
+  - If you wish Momus to post formal `APPROVE` reviews rather than `COMMENT`, configure:
+    - `MOMUS_APP_ID`: Your GitHub App ID.
+    - `MOMUS_APP_PRIVATE_KEY`: Your GitHub App PEM private key.
+- **Triggering Reviews**:
+  - Momus runs automatically when PRs are opened.
+  - Re-trigger reviews on any PR by commenting `/ai-review` or `@axiomantic-momus[bot]`.
+{%- endif %}
+
+{%- if flavor == 'nim_python_wheel' %}
+### PyPI Publishing (`.github/workflows/cibuildwheel.yml`)
+To publish native wheels to PyPI:
+- Configure trusted publishing via PyPI or add `PYPI_API_TOKEN` to **Settings > Secrets and variables > Actions**.
+{%- elif flavor == 'nim_ts_wasm' %}
+### npm Publishing
+To publish the TypeScript / WASM package to npm:
+- Add `NPM_TOKEN` to **Settings > Secrets and variables > Actions**.
+{%- endif %}
+
+---
+
+## 4. Architectural Flavor Details: `{{ flavor }}`
+
+{%- if flavor == 'pure_nim' %}
+- **Core Library Source**: `src/{{ package_name }}.nim`
+- **Nimble Package Definition**: `{{ package_name }}.nimble`
+- **Tests**: `tests/` (run via `just test` or `nimble test`)
+{%- elif flavor == 'nim_ts_wasm' %}
+- **Nim Source & WASM Export**: `src/{{ package_name }}.nim`
+- **TypeScript Runtime & Bridge**: `ts/runtime.ts`, `ts/index.ts`
+- **Vitest Suite**: `tests/test_ts_bridge.ts` (run via `npm test` or `just test`)
+- **WASM Build Script**: `scripts/compile_wasm.sh`
+{%- elif flavor == 'nim_python_wheel' %}
+- **Native Extension Source**: `src/{{ package_name }}.nim`
+- **CMake & Wheel Configuration**: `CMakeLists.txt`, `pyproject.toml`
+- **Python Ctypes Wrapper**: `src_py/{{ package_name }}/`
+- **Pytest Suite**: `tests_py/` (run via `pytest tests_py/` or `just test`)
+{%- elif flavor == 'headerkit_binding' %}
+- **Foreign C Headers & Implementation**: `include/`
+- **HeaderKit Configuration**: `headerkit.toml`
+- **Bindings Generator**: `scripts/generate_bindings.py`
+- **Tripwire Symbol Verification**: `tests/test_tripwire.nim`
+{%- endif %}
+
+---
+
+## 5. Local Overrides (`justfile.local`)
+
+To declare project-specific or developer-local `just` recipes without colliding with upstream template updates, create a `justfile.local` in the project root:
+
+```just
+# justfile.local
+my-custom-task:
+    @echo "Running custom local task..."
+```
+
+`justfile.local` is automatically ignored by `.gitignore` and imported by `justfile`.
+
+---
+
+## 6. Upstream Template Updates
+
+Polyform supports continuous upstream template synchronization via Copier:
+
+```bash
+# Pull upstream template improvements and workflow updates
+just update-template
+```
+
+Answers are tracked in `.copier-answers.yml`. Domain code is never overwritten.

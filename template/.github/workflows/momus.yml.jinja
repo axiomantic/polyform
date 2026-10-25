@@ -1,4 +1,4 @@
-{% raw %}name: Momus
+name: Momus
 
 on:
   pull_request:
@@ -20,12 +20,13 @@ jobs:
       issues: write
     uses: axiomantic/.github/.github/workflows/momus.yml@devel
     with:
-      pr_number: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
-      event_name: ${{ github.event_name }}
+      pr_number: {% raw %}${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}{% endraw %}
+      event_name: {% raw %}${{ github.event_name }}{% endraw %}
       trigger_command: /ai-review
       trigger_mention: "@axiomantic-momus[bot]"
+      model: {{ momus_model }}
+      base_url: {{ momus_base_url }}
     secrets:
-      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-      MOMUS_APP_ID: ${{ secrets.MOMUS_APP_ID }}
-      MOMUS_APP_PRIVATE_KEY: ${{ secrets.MOMUS_APP_PRIVATE_KEY }}
-{% endraw %}
+      LLM_API_KEY: {% raw %}${{ secrets.LLM_API_KEY }}{% endraw %}
+      MOMUS_APP_ID: {% raw %}${{ secrets.MOMUS_APP_ID }}{% endraw %}
+      MOMUS_APP_PRIVATE_KEY: {% raw %}${{ secrets.MOMUS_APP_PRIVATE_KEY }}{% endraw %}

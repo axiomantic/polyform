@@ -1,0 +1,16 @@
+# Momus PR Review Configuration
+# https://github.com/axiomantic/momus
+
+review:
+  emit_nits: false
+  max_findings: 20
+  emphasis_modules:
+    - security
+    - quality_checklist
+
+verify:
+  enabled: true
+
+provider:
+  model: {{ momus_model }}
+  base_url: {{ momus_base_url }}

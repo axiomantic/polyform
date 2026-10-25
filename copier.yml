@@ -84,6 +84,18 @@ enable_momus_review:
   help: "Include Axiomantic Momus AI PR review workflow (.github/workflows/momus.yml)?"
   default: true
 
+momus_model:
+  type: str
+  help: "Model identifier for Momus PR review (OpenRouter / OpenAI compatible)"
+  default: "deepseek/deepseek-v4-flash"
+  when: "{{ enable_momus_review }}"
+
+momus_base_url:
+  type: str
+  help: "API base URL for Momus PR review endpoint"
+  default: "https://openrouter.ai/api/v1"
+  when: "{{ enable_momus_review }}"
+
 license:
   type: str
   help: "Software license"
@@ -137,10 +149,22 @@ _exclude:
 
   # Momus review exclusion
   - "{% if not enable_momus_review %}.github/workflows/momus.yml{% endif %}"
+  - "{% if not enable_momus_review %}.momus.yaml{% endif %}"
 
 # ----------------------------------------------------------------------
 # 6. Post-Copy Lifecycle Tasks
 # ----------------------------------------------------------------------
 _tasks:
   - "test -d .git || git init -q"
-  - "echo 'Polyform: Initialized {{ repo_name }} ({{ flavor }}) successfully.'"
+  - >-
+    bash -c '
+    printf "\n\033[1;36m======================================================================\033[0m\n"
+    printf "\033[1;32m  Polyform: Scaffolding Complete for %s (%s)\033[0m\n" "{{ repo_name }}" "{{ flavor }}"
+    printf "\033[1;36m======================================================================\033[0m\n"
+    printf "  \033[1mNext Steps:\033[0m\n"
+    printf "    1. cd %s\n" "{{ repo_name }}"
+    printf "    2. just setup\n"
+    printf "    3. just test\n"
+    printf "  \033[1;33mReview NEXT_STEPS.md for tailored checklists and CI secrets setup.\033[0m\n"
+    printf "\033[1;36m======================================================================\033[0m\n\n"
+    '

@@ -72,6 +72,13 @@ for FLAVOR in "${FLAVORS[@]}"; do
   echo ">>> [VERIFY] Checking .copier-answers.yml, workflows, and justfile extension hooks..."
   test -f "${DEST}/.copier-answers.yml"
   test -f "${DEST}/.github/workflows/ci.yml"
+  test -f "${DEST}/NEXT_STEPS.md"
+  test -f "${DEST}/.momus.yaml"
+  grep -q "update-template:" "${DEST}/justfile"
+  grep -q "model: deepseek/deepseek-v4-flash" "${DEST}/.github/workflows/momus.yml"
+  grep -q "base_url: https://openrouter.ai/api/v1" "${DEST}/.github/workflows/momus.yml"
+  grep -q "deepseek/deepseek-v4-flash" "${DEST}/.momus.yaml"
+  grep -q "https://openrouter.ai/api/v1" "${DEST}/.momus.yaml"
   grep -q "import? 'justfile.local'" "${DEST}/justfile"
   echo "test-hook:" > "${DEST}/justfile.local"
   echo "    @echo 'local-hook-active'" >> "${DEST}/justfile.local"
@@ -80,6 +87,23 @@ for FLAVOR in "${FLAVORS[@]}"; do
   if [[ "${LOCAL_HOOK_OUT}" != "local-hook-active" ]]; then
     echo "ERROR: justfile.local extension hook failed to execute in ${FLAVOR}" >&2
     exit 1
+  fi
+
+  if [[ "${FLAVOR}" == "pure_nim" ]]; then
+    echo ">>> [VERIFY] Negative control: verifying momus exclusion when enable_momus_review=false..."
+    MOMUS_NEG_DEST="${FIXTURE_DIR}/momus_neg_test"
+    uvx copier copy --vcs-ref=HEAD --trust --defaults \
+      -d project_name="Momus Neg Test" \
+      -d repo_name="momus-neg-test" \
+      -d package_name="momus_neg_test" \
+      -d flavor="pure_nim" \
+      -d docs_engine="none" \
+      -d enable_momus_review=false \
+      "${REPO_ROOT}" "${MOMUS_NEG_DEST}"
+    test ! -f "${MOMUS_NEG_DEST}/.momus.yaml"
+    test ! -f "${MOMUS_NEG_DEST}/.github/workflows/momus.yml"
+    rm -rf "${MOMUS_NEG_DEST}"
+    echo ">>> [VERIFY] Negative control passed: .momus.yaml and momus.yml successfully excluded."
   fi
 
   echo ">>> [SETUP] Installing required toolchain dependencies for ${FLAVOR}..."
