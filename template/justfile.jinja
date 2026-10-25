@@ -7,7 +7,7 @@ setup:
     npm install
     nimble install --depsOnly -y
 {%- elif flavor == 'nim_python_wheel' %}
-    python3 -m pip install -e ".[test]"
+    python3 -m pip install -e ".[dev]"
     nimble install --depsOnly -y
 {%- else %}
     nimble install --depsOnly -y

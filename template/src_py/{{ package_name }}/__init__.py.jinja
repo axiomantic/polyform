@@ -1,0 +1,87 @@
+from __future__ import annotations
+
+import ctypes
+import importlib.util
+import sys
+from pathlib import Path
+
+if sys.platform == "win32":
+    _lib_name = "{{ package_name }}_ext.dll"
+elif sys.platform == "darwin":
+    _lib_name = "lib{{ package_name }}_ext.dylib"
+else:
+    _lib_name = "lib{{ package_name }}_ext.so"
+
+# Locate compiled native shared library across package search paths
+_pkg_dir = Path(__file__).parent.resolve()
+_lib_path: Path | None = None
+
+# 1. Check current directory (__file__.parent)
+if (_pkg_dir / _lib_name).exists():
+    _lib_path = _pkg_dir / _lib_name
+
+# 2. Check spec search locations (handles editable installs via scikit-build-core)
+if _lib_path is None:
+    _spec = importlib.util.find_spec("{{ package_name }}")
+    if _spec and _spec.submodule_search_locations:
+        for _loc in _spec.submodule_search_locations:
+            _candidate = Path(_loc) / _lib_name
+            if _candidate.exists():
+                _lib_path = _candidate
+                break
+
+# 3. Check build / project root directory fallbacks
+if _lib_path is None:
+    for _fallback in [_pkg_dir.parent / _lib_name, _pkg_dir.parent.parent / "build" / _lib_name]:
+        if _fallback.exists():
+            _lib_path = _fallback
+            break
+
+if _lib_path is None:
+    raise ImportError(
+        f"Native shared library '{_lib_name}' not found for package '{{ package_name }}'. "
+        "Please build the project first."
+    )
+
+# Load library via ctypes
+_lib = ctypes.CDLL(str(_lib_path))
+
+# Initialize Nim runtime
+if hasattr(_lib, "nim_init"):
+    _lib.nim_init()
+elif hasattr(_lib, "NimMain"):
+    _lib.NimMain()
+
+# Configure proc signatures
+_lib.nim_hello.argtypes = []
+_lib.nim_hello.restype = ctypes.c_char_p
+
+_lib.nim_add.argtypes = [ctypes.c_longlong, ctypes.c_longlong]
+_lib.nim_add.restype = ctypes.c_longlong
+
+_lib.nim_version.argtypes = []
+_lib.nim_version.restype = ctypes.c_char_p
+
+
+def hello() -> str:
+    """Return greeting string from Nim native extension."""
+    raw = _lib.nim_hello()
+    if raw is None:
+        raise RuntimeError("nim_hello returned NULL")
+    return raw.decode("utf-8")
+
+
+def add(a: int, b: int) -> int:
+    """Add two integers using Nim native extension."""
+    return int(_lib.nim_add(int(a), int(b)))
+
+
+def version() -> str:
+    """Return package version from Nim native extension."""
+    raw = _lib.nim_version()
+    if raw is None:
+        raise RuntimeError("nim_version returned NULL")
+    return raw.decode("utf-8")
+
+
+__all__ = ["add", "hello", "version"]

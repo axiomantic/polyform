@@ -5,6 +5,10 @@ const projectVersion* = "0.0.1"
 proc hello*(): string =
   ## Returns standard project greeting string.
   "hello from {{ package_name }}"
+
+proc add*(a, b: int): int =
+  ## Adds two integers.
+  a + b
 {%- if flavor == 'headerkit_binding' %}
 
 # HeaderKit C-ABI foreign bindings
@@ -12,4 +16,27 @@ proc hello*(): string =
 
 proc {{ package_name }}_add*(a, b: int32): int32 {.importc: "{{ package_name }}_add", cdecl.}
   ## Computes sum via foreign C entrypoint.
+{%- elif flavor == 'nim_python_wheel' %}
+
+# -----------------------------------------------------------------------------
+# C-ABI Exports for Python ctypes / native extension
+# -----------------------------------------------------------------------------
+
+proc NimMain*() {.cdecl, importc.}
+
+proc nim_init*() {.cdecl, exportc, dynlib.} =
+  ## Explicit runtime initialization for C-ABI / ctypes loading.
+  NimMain()
+
+proc nim_hello*(): cstring {.cdecl, exportc, dynlib.} =
+  ## Exported greeting proc returning null-terminated cstring.
+  hello().cstring
+
+proc nim_add*(a, b: int): int {.cdecl, exportc, dynlib.} =
+  ## Exported integer addition.
+  add(a, b)
+
+proc nim_version*(): cstring {.cdecl, exportc, dynlib.} =
+  ## Exported version string.
+  projectVersion.cstring
 {%- endif %}

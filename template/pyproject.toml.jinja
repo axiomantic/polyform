@@ -1,0 +1,43 @@
+[build-system]
+requires = ["scikit-build-core>=0.9.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "{{ repo_name }}"
+version = "0.0.1"
+description = "{{ description }}"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "{{ author_name }}", email = "{{ author_email }}" },
+]
+license = { text = "{{ license }}" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Nim",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "ruff>=0.3.0",
+    "scikit-build-core>=0.9.0",
+    "cmake>=3.18",
+]
+test = [
+    "pytest>=7.0.0",
+]
+
+[tool.scikit-build]
+wheel.packages = ["src_py/{{ package_name }}"]
+build.verbose = true
+install.strip = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests_py"]
+python_files = ["test_*.py"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
