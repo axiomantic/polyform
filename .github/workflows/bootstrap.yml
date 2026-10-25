@@ -1,0 +1,65 @@
+name: Polyform Auto-Hydration
+on:
+  push:
+    branches: [main, master]
+permissions:
+  contents: write
+
+jobs:
+  hydrate:
+    # Only run on newly spawned repositories, never on polyform template itself
+    if: github.repository != 'axiomantic/polyform' && hashFiles('copier.yml') != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Install uv & Copier
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Derive Project Metadata
+        id: meta
+        run: |
+          REPO_OWNER="${GITHUB_REPOSITORY%/*}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          REPO_SLUG="${REPO_NAME//-/_}"
+          echo "owner=${REPO_OWNER}" >> "$GITHUB_OUTPUT"
+          echo "name=${REPO_NAME}" >> "$GITHUB_OUTPUT"
+          echo "slug=${REPO_SLUG}" >> "$GITHUB_OUTPUT"
+
+      - name: Render Template In-Place
+        run: |
+          # Render template to temporary staging directory
+          uvx copier copy --trust --defaults \
+            -d project_name="${{ steps.meta.outputs.name }}" \
+            -d repo_name="${{ steps.meta.outputs.name }}" \
+            -d package_name="${{ steps.meta.outputs.slug }}" \
+            -d github_owner="${{ steps.meta.outputs.owner }}" \
+            -d flavor="pure_nim" \
+            -d docs_engine="starlight" \
+            . /tmp/hydrated
+
+          # Clear entire unhydrated template from workspace
+          git rm -rf .
+
+          # CRITICAL FIX: Purge staging .git directory to prevent corrupting active repository git
+          rm -rf /tmp/hydrated/.git
+
+          # Copy rendered files into workspace root
+          cp -a /tmp/hydrated/. .
+
+          # Ensure .copier-answers.yml records upstream remote (portable across GNU/BSD)
+          python3 -c "import pathlib, re; p = pathlib.Path('.copier-answers.yml'); p.write_text(re.sub(r'_src_path: .*', '_src_path: gh:axiomantic/polyform', p.read_text()))"
+
+      - name: Commit Hydration & Self-Delete
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: hydrate repository from polyform template [skip ci]"
+          git push origin HEAD
