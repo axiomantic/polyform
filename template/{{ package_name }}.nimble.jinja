@@ -1,0 +1,25 @@
+# Package
+
+version = "0.0.1"
+author = "{{ author_name }}"
+description = "{{ description }}"
+license = "{{ license }}"
+srcDir = "src"
+installExt = @["nim"]
+
+# Dependencies
+
+requires "nim >= 2.0.0"
+
+# Tasks
+
+task test, "Run test suite":
+  for file in listFiles("tests"):
+    if (file.startsWith("tests/test") or file.startsWith("tests/t")) and
+        file.endsWith(".nim") and not file.endsWith("config.nims"):
+      exec "nim r --hints:off " & file
+{%- if docs_engine == 'starlight' %}
+
+task docgen, "Generate API documentation for Starlight":
+  exec "nim c -r tools/docgen.nim"
+{%- endif %}

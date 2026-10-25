@@ -1,0 +1,84 @@
+default:
+    @just --list
+
+# 1. Dependency Setup
+setup:
+{%- if flavor == 'nim_ts_wasm' %}
+    npm install
+    nimble install --depsOnly -y
+{%- elif flavor == 'nim_python_wheel' %}
+    python3 -m pip install -e ".[test]"
+    nimble install --depsOnly -y
+{%- else %}
+    nimble install --depsOnly -y
+{%- endif %}
+{%- if docs_engine in ['starlight', 'vitepress'] %}
+    cd docs && npm install
+{%- endif %}
+
+# 2. Test Suite Execution
+test:
+{%- if flavor == 'nim_ts_wasm' %}
+    nimble test
+    npm run test
+{%- elif flavor == 'nim_python_wheel' %}
+    nimble test
+    pytest tests_py/
+{%- else %}
+    nimble test
+{%- endif %}
+
+# 3. Linter Execution
+lint:
+    nph --check .
+    nimble check
+{%- if flavor == 'nim_ts_wasm' %}
+    npm run lint
+{%- elif flavor == 'nim_python_wheel' %}
+    ruff check .
+{%- endif %}
+
+# 4. Formatter Execution
+fmt:
+    nph .
+{%- if flavor == 'nim_ts_wasm' %}
+    npm run fmt
+{%- elif flavor == 'nim_python_wheel' %}
+    ruff format .
+{%- endif %}
+
+# 5. Build Artifacts
+build:
+{%- if flavor == 'nim_ts_wasm' %}
+    npm run build
+{%- elif flavor == 'nim_python_wheel' %}
+    python -m build --wheel
+{%- else %}
+    nimble build -d:release
+{%- endif %}
+
+{%- if docs_engine != 'none' %}
+
+# 6. Documentation Dev Server
+docs:
+{%- if docs_engine == 'starlight' %}
+    nimble docgen
+    cd docs && npm run dev
+{%- elif docs_engine == 'vitepress' %}
+    cd docs && npm run docs:dev
+{%- endif %}
+
+# 7. Documentation Production Build
+docs-build:
+{%- if docs_engine == 'starlight' %}
+    nimble docgen
+    cd docs && npm run build
+{%- elif docs_engine == 'vitepress' %}
+    cd docs && npm run docs:build
+{%- endif %}
+{%- endif %}
+
+# 8. Clean Build Artifacts
+clean:
+    rm -rf nimcache htmldocs site docs/dist docs/.astro tools/docgen
+    find . -name '*.exe' -delete

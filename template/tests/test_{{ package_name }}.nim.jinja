@@ -1,0 +1,9 @@
+import unittest
+import {{ package_name }}
+
+suite "{{ package_name }}":
+  test "hello returns expected greeting":
+    check hello() == "hello from {{ package_name }}"
+
+  test "version present":
+    check projectVersion == "0.0.1"

@@ -1,0 +1,43 @@
+nimcache/
+*.exe
+*.out
+*.dll
+*.so
+*.dylib
+nimblecache/
+.nimble/
+htmldocs/
+site/
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+{% if docs_engine != 'none' %}
+# Documentation build artifacts
+docs/node_modules/
+docs/.astro/
+docs/dist/
+{% if docs_engine == 'starlight' %}
+tools/docgen
+{% endif %}
+{% endif %}
+
+{% if flavor == 'nim_ts_wasm' %}
+# TypeScript / WASM artifacts
+node_modules/
+dist/
+*.wasm
+{% elif flavor == 'nim_python_wheel' %}
+# Python wheel artifacts
+__pycache__/
+*.pyc
+build/
+*.egg-info/
+.pytest_cache/
+.venv/
+{% elif flavor == 'headerkit_binding' %}
+# HeaderKit artifacts
+*.o
+*.a
+{% endif %}

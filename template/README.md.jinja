@@ -1,0 +1,43 @@
+# {{ project_name }}
+
+[![CI](https://github.com/{{ github_owner }}/{{ repo_name }}/actions/workflows/ci.yml/badge.svg)](https://github.com/{{ github_owner }}/{{ repo_name }}/actions/workflows/ci.yml)
+{% if docs_engine != 'none' %}
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://{{ github_owner }}.github.io/{{ repo_name }}/)
+{% endif %}
+[![Release](https://img.shields.io/github/v/release/{{ github_owner }}/{{ repo_name }})](https://github.com/{{ github_owner }}/{{ repo_name }}/releases/latest)
+[![License](https://img.shields.io/github/license/{{ github_owner }}/{{ repo_name }})](LICENSE)
+[![Nim](https://img.shields.io/badge/Nim-2.2%2B-yellow.svg)](https://nim-lang.org)
+
+{{ description }}
+
+## Quick Start
+
+```nim
+import {{ package_name }}
+
+echo hello()
+```
+
+## Development
+
+The `justfile` is the canonical command surface for common tasks:
+
+```bash
+just setup        # Install dependencies
+just test         # Run test suite
+just lint         # Check formatting (nph) and nimble check
+just fmt          # Auto-format codebase with nph
+{% if docs_engine != 'none' %}
+just docs         # Extract API docs and launch local doc server
+just docs-build   # Build static production documentation
+{% endif %}
+just build        # Build release artifacts
+```
+
+## Upstream Updates
+
+This project was initialized via [Polyform](https://github.com/axiomantic/polyform). To update boilerplate, CI workflows, and tooling from upstream:
+
+```bash
+uvx copier update --trust
+```
