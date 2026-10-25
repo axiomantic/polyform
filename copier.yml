@@ -132,7 +132,7 @@ _exclude:
 
   # Documentation engine exclusions
   - "{% if docs_engine == 'none' %}docs{% endif %}"
-  - "{% if docs_engine == 'none' %}tools/docgen.nim{% endif %}"
+  - "{% if docs_engine != 'starlight' %}tools{% endif %}"
   - "{% if docs_engine == 'none' %}.github/workflows/docs.yml{% endif %}"
   - "{% if docs_engine != 'starlight' %}docs/astro.config.mjs{% endif %}"
   - "{% if docs_engine != 'vitepress' %}docs/.vitepress{% endif %}"
