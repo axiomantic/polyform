@@ -106,9 +106,9 @@ _exclude:
   - "__pycache__"
 
   # Flavor B: nim_ts_wasm exclusions
-  - "{% if flavor != 'nim_ts_wasm' %}package.json{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}package-lock.json{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}tsconfig.json{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}/package.json{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}/package-lock.json{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}/tsconfig.json{% endif %}"
   - "{% if flavor != 'nim_ts_wasm' %}vitest.config.ts{% endif %}"
   - "{% if flavor != 'nim_ts_wasm' %}ts{% endif %}"
   - "{% if flavor != 'nim_ts_wasm' %}scripts/compile_wasm.sh{% endif %}"

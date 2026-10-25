@@ -37,22 +37,27 @@ for FLAVOR in "${FLAVORS[@]}"; do
     pure_nim)
       PKG_SLUG="fixture_pure"
       REPO_SLUG="fixture-pure"
+      DOCS_ENGINE="starlight"
       ;;
     nim_ts_wasm)
       PKG_SLUG="fixture_wasm"
       REPO_SLUG="fixture-wasm"
+      DOCS_ENGINE="none"
       ;;
     nim_python_wheel)
       PKG_SLUG="fixture_wheel"
       REPO_SLUG="fixture-wheel"
+      DOCS_ENGINE="none"
       ;;
     headerkit_binding)
       PKG_SLUG="fixture_hk"
       REPO_SLUG="fixture-hk"
+      DOCS_ENGINE="none"
       ;;
     *)
       PKG_SLUG="fixture_${FLAVOR}"
       REPO_SLUG="fixture-${FLAVOR//_/-}"
+      DOCS_ENGINE="none"
       ;;
   esac
   
@@ -61,15 +66,19 @@ for FLAVOR in "${FLAVORS[@]}"; do
     -d repo_name="${REPO_SLUG}" \
     -d package_name="${PKG_SLUG}" \
     -d flavor="${FLAVOR}" \
-    -d docs_engine="none" \
+    -d docs_engine="${DOCS_ENGINE}" \
     "${REPO_ROOT}" "${DEST}"
 
-  echo ">>> [VERIFY] Checking .copier-answers.yml presence..."
+  echo ">>> [VERIFY] Checking .copier-answers.yml and workflows presence..."
   test -f "${DEST}/.copier-answers.yml"
+  test -f "${DEST}/.github/workflows/ci.yml"
 
   echo ">>> [SETUP] Installing required toolchain dependencies for ${FLAVOR}..."
   if [[ "${FLAVOR}" == "nim_ts_wasm" ]]; then
     (cd "${DEST}" && npm install --no-audit --no-fund)
+  fi
+  if [[ "${DOCS_ENGINE}" == "starlight" ]]; then
+    (cd "${DEST}/docs" && npm install --no-audit --no-fund)
   fi
 
   # LINT VERIFICATION
@@ -93,6 +102,13 @@ for FLAVOR in "${FLAVORS[@]}"; do
       (cd "${DEST}" && npx vitest run)
     elif [[ "${FLAVOR}" == "nim_python_wheel" ]]; then
       (cd "${DEST}" && uv run --with pytest pytest tests_py/)
+    fi
+    if [[ "${DOCS_ENGINE}" == "starlight" ]]; then
+      echo ">>> [TEST] Verifying documentation build for ${FLAVOR} (starlight)..."
+      (cd "${DEST}" && just docs-build)
+      test -d "${DEST}/docs/dist"
+      test -f "${DEST}/docs/dist/index.html"
+      echo ">>> [TEST] Documentation build passed and generated docs/dist."
     fi
     echo ">>> [TEST] ${FLAVOR} test suites passed 100% green."
   fi
