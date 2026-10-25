@@ -44,7 +44,7 @@ Polyform maintainers execute all workflows via `just`:
 | Matrix Fixtures | `just fixtures` | Render, setup, lint, and test all 4 flavor fixtures |
 | Lint | `just lint` | Run linters across all 4 flavor fixtures |
 | Clean | `just clean` | Remove temporary fixture staging directories |
-| Single Flavor Test | `just test-fixtures flavor=nim_ts_wasm` | Target specific flavor verification |
+| Single Flavor Test | `just test flavor=nim_ts_wasm` | Target specific flavor verification |
 
 ---
 

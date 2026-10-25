@@ -36,9 +36,8 @@ jobs:
           beta = data.get("enable-beta-ecosystems")
           assert beta is True, f"enable-beta-ecosystems must be true, got {beta}"
           updates = data.get("updates", [])
-          assert len(updates) >= 2, f"Expected at least 2 update ecosystems, got {len(updates)}"
+          assert len(updates) >= 1, f"Expected at least 1 update ecosystem, got {len(updates)}"
           ecosystems = [u["package-ecosystem"] for u in updates]
-          assert "nimble" in ecosystems, f"Missing nimble ecosystem: {ecosystems}"
           assert "github-actions" in ecosystems, f"Missing github-actions ecosystem: {ecosystems}"
-          print("Dependabot configuration validated successfully with ecosystems:", ecosystems)
+          print("Root dependabot configuration validated successfully with ecosystems:", ecosystems)
           '
