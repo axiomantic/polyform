@@ -5,11 +5,11 @@ const projectVersion* = "0.0.1"
 proc hello*(): string =
   ## Returns standard project greeting string.
   "hello from {{ package_name }}"
+{%- if flavor == 'headerkit_binding' %}
 
-{% if flavor == 'headerkit_binding' %}
 # HeaderKit C-ABI foreign bindings
 {.compile: "../include/{{ package_name }}.c".}
 
 proc {{ package_name }}_add*(a, b: int32): int32 {.importc: "{{ package_name }}_add", cdecl.}
   ## Computes sum via foreign C entrypoint.
-{% endif %}
+{%- endif %}
