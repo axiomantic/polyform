@@ -53,7 +53,7 @@ Documentation lives in `docs/` powered by Starlight with automated API extractio
 - **Doc comments:** standard Nim `## ` doc comments parsed automatically into API references.
 - **Formatting authority:** `nph` is the only formatter (pinned to v0.7.0 in pre-commit, ci.yml, and Setup). Do not hand-format.
 - **Pre-commit guard:** `pre-commit` in CI and on commit (`nph`, `nimble check`, YAML, file hygiene).
-- **Dependencies:** Automated via native Dependabot Nim ecosystem (`.github/dependabot.yml`).
+- **Dependencies:** Automated via Renovate (`.github/renovate.json`) and GitHub Dependabot (`.github/dependabot.yml`).
 - **The justfile is the canonical command surface:** `nimble` is an implementation detail. Add new dev workflows as `just` recipes, not as ad-hoc shell commands in README.
 
 ## Forbidden Patterns

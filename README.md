@@ -110,6 +110,6 @@ just test-fixtures flavor=nim_python_wheel
 ## Conventions & Standards
 
 - **Formatting Authority:** `nph` is the canonical formatter for Nim code and `.nimble` manifests.
-- **Dependency Automation:** Automated via native Dependabot Nim ecosystem (`.github/dependabot.yml`).
+- **Dependency Automation:** Automated via Renovate (`.github/renovate.json`) and GitHub Dependabot (`.github/dependabot.yml`).
 - **Canonical Command Surface:** Dev workflows are encoded as `just` recipes (`justfile`).
 - **Axiomantic Quality Invariants:** Verified via the Three-Key Gate, zero dead code/stubs, and anti-green-mirage assertions.

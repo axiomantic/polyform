@@ -74,6 +74,13 @@ for FLAVOR in "${FLAVORS[@]}"; do
   test -f "${DEST}/.github/workflows/ci.yml"
   test -f "${DEST}/NEXT_STEPS.md"
   test -f "${DEST}/.momus.yaml"
+  test -f "${DEST}/.github/renovate.json"
+  grep -q '"nimble":' "${DEST}/.github/renovate.json"
+  test -f "${DEST}/.github/dependabot.yml"
+  if grep -q 'package-ecosystem: "nimble"' "${DEST}/.github/dependabot.yml"; then
+    echo "ERROR: dependabot.yml must not contain unsupported nimble ecosystem" >&2
+    exit 1
+  fi
   grep -q "update-template:" "${DEST}/justfile"
   grep -q "check-secrets:" "${DEST}/justfile"
   grep -q "check-secrets:" "${REPO_ROOT}/justfile"

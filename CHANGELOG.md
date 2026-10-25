@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.3] - 2026-10-25
+
+### Fixed
+- Dependency Automation: Purged unsupported `package-ecosystem: "nimble"` from `.github/dependabot.yml.jinja` to prevent GitHub Dependabot schema errors.
+- Dependabot Configuration: Kept Dependabot strictly scoped to supported ecosystems (`github-actions`, plus `npm` and `pip` when appropriate).
+
+### Added
+- Renovate Configuration: Added `.github/renovate.json.jinja` and root `.github/renovate.json` with native `nimble.enabled: true` for Renovate bot integration.
+- Dependency Verification: Updated `dependabot-verify.yml` to validate both Dependabot and Renovate configurations and assert absence of unsupported ecosystems.
+
+## [0.1.2] - 2026-10-25
 
 ### Added
 - Gitleaks secret scanner integration: v8.24.0 in `.pre-commit-config.yaml.jinja`, `gitleaks/gitleaks-action@v2` job in `ci.yml.jinja`, and `check-secrets` recipe in `justfile.jinja` and root `justfile`
