@@ -1,0 +1,80 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: {% raw %}${{ matrix.os }}{% endraw %}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        nim-version: [stable, "2.2.6", devel]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: {% raw %}${{ matrix.nim-version }}{% endraw %}
+          parent-nim-install-directory: {% raw %}${{ runner.temp }}{% endraw %}
+{%- if flavor == 'nim_ts_wasm' %}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+{%- elif flavor in ['nim_python_wheel', 'headerkit_binding'] %}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+{%- endif %}
+
+      - uses: actions/cache@v5
+        with:
+          path: ~/.nimble
+          key: nimble-{% raw %}${{ runner.os }}-${{ hashFiles('**/*.nimble') }}{% endraw %}
+
+      - name: Install dependencies
+        run: |
+{%- if flavor == 'nim_ts_wasm' %}
+          npm install
+{%- elif flavor == 'nim_python_wheel' %}
+          python3 -m pip install -e ".[dev]"
+{%- elif flavor == 'headerkit_binding' %}
+          python3 -m pip install pyyaml
+{%- endif %}
+          nimble install --depsOnly -y
+
+      - name: nph format check
+        run: |
+          nimble install -y nph@0.7.0
+          nph --check .
+        continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
+
+      - name: nimble check
+        run: nimble check
+        continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
+{%- if flavor == 'nim_ts_wasm' %}
+
+      - name: npm lint
+        run: npm run lint
+{%- elif flavor == 'nim_python_wheel' %}
+
+      - name: ruff check
+        run: ruff check .
+{%- endif %}
+
+      - name: Test
+        run: |
+          nimble test
+{%- if flavor == 'nim_ts_wasm' %}
+          npm run test
+{%- elif flavor == 'nim_python_wheel' %}
+          pytest tests_py/
+{%- endif %}
+        continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}

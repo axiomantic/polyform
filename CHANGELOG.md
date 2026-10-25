@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement Flavor C (Nim Native Python Wheel) with scikit-build-core, CMake, ctypes, and pytest (Task 2.2)
 - Integrate native Dependabot Nim ecosystem and purge Renimble legacy workflows (Task 4.1)
 - Clean root legacy artifacts and establish Polyform storefront (Task 5.2)
+- Add Astro Starlight documentation portal templates, tools/docgen.nim, and rendered repo GitHub Actions workflows (ci.yml, docs.yml, auto-tag.yml, momus.yml) (Task 5.1)
 
 ### Removed
 - Deprecated template-cleanup.yml workflow and template-cleanup-marker (superseded by bootstrap.yml) (Task 3.1)
