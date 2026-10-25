@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement Flavor B (Nim + TypeScript/WASM bridge) with ESM packaging, Vite runtime, and Vitest suite (Task 2.1)
 - Flavor D (HeaderKit C/C++ Binding Extension): headerkit.toml.jinja, include/ C header and implementation, bindings generator script, and test_tripwire symbol verification (Task 2.3)
 - GitHub Web UI auto-hydration workflow (.github/workflows/bootstrap.yml) with self-deletion and .copier-answers.yml upstream recording (Task 3.1)
+- Implement Flavor C (Nim Native Python Wheel) with scikit-build-core, CMake, ctypes, and pytest (Task 2.2)
 
 ### Removed
 - Deprecated template-cleanup.yml workflow and template-cleanup-marker (superseded by bootstrap.yml) (Task 3.1)
