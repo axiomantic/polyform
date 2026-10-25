@@ -1,7 +1,13 @@
-name: Deploy Docs
+name: Deploy Documentation
+
 on:
   push:
     branches: [main]
+    paths:
+      - "docs/**"
+      - "src/**"
+      - "tools/**"
+      - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 permissions:
@@ -10,7 +16,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: false
 
 jobs:
@@ -19,13 +25,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-{%- if docs_engine == 'starlight' %}
-
-      - name: Setup Nim
-        uses: jiro4989/setup-nim-action@v2
-        with:
-          nim-version: stable
-          parent-nim-install-directory: {% raw %}${{ runner.temp }}{% endraw %}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -34,6 +33,11 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: Setup Nim
+        uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
 
       - name: Generate API Docs
         run: |
@@ -50,27 +54,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/dist
-{%- elif docs_engine == 'vitepress' %}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Install dependencies
-        run: cd docs && npm install
-
-      - name: Build Docs
-        run: cd docs && npm run docs:build
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/.vitepress/dist
-{%- endif %}
 
   deploy:
     environment:

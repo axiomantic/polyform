@@ -106,7 +106,8 @@ proc main() =
         continue
 
       if fileExists(jsonFile):
-        let targetDoc = apiDocsDir / (splitPath(file).tail.changeFileExt("md"))
+        let targetDoc = apiDocsDir / rel.changeFileExt("md")
+        createDir(parentDir(targetDoc))
         generateModuleDoc(moduleName, jsonFile, targetDoc)
         modules.add(moduleName)
 

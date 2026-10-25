@@ -27,8 +27,6 @@ Single-package src layout. Public API is exposed via `src/{{ package_name }}.nim
 Tests live in `tests/` and are discovered by `just test` / `nimble test`.
 {% if docs_engine == 'starlight' %}
 Documentation lives in `docs/` powered by Starlight with automated API extraction.
-{% elif docs_engine == 'vitepress' %}
-Documentation lives in `docs/` powered by VitePress.
 {% endif %}
 
 ## Key Modules
@@ -84,9 +82,6 @@ or skew will cause "format clean locally, fails in CI" footguns.
 Documentation lives in `docs/` using Astro + Starlight.
 API references are extracted automatically from Nim source code using `nimble docgen` (powered by `tools/docgen.nim`).
 Mermaid diagrams (` ```mermaid `) and image zooming are supported out of the box.
-{% elif docs_engine == 'vitepress' %}
-### VitePress Documentation Engine
-Documentation lives in `docs/` using VitePress.
 {% endif %}
 
 ## Glossary

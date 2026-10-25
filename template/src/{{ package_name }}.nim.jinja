@@ -2,13 +2,21 @@
 
 const projectVersion* = "0.0.1"
 
+const greetingMsg* = "hello from {{ package_name }}"
+
 proc hello*(): string =
   ## Returns standard project greeting string.
-  "hello from {{ package_name }}"
+  greetingMsg
 
+{% if flavor == 'nim_ts_wasm' -%}
+proc add*(a, b: int): int {.exportc: "add", cdecl.} =
+  ## Adds two integers (exported to WebAssembly).
+  a + b
+{%- else -%}
 proc add*(a, b: int): int =
   ## Adds two integers.
   a + b
+{%- endif %}
 {%- if flavor == 'headerkit_binding' %}
 
 # HeaderKit C-ABI foreign bindings
@@ -29,8 +37,8 @@ proc nim_init*() {.cdecl, exportc, dynlib.} =
   NimMain()
 
 proc nim_hello*(): cstring {.cdecl, exportc, dynlib.} =
-  ## Exported greeting proc returning null-terminated cstring.
-  hello().cstring
+  ## Exported greeting proc returning static cstring buffer.
+  greetingMsg.cstring
 
 proc nim_add*(a, b: int): int {.cdecl, exportc, dynlib.} =
   ## Exported integer addition.

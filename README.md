@@ -14,7 +14,7 @@ Polyform provides four out-of-the-box architectural flavor topologies:
 
 | Flavor | Target Architecture | Toolchain & Runtime | Packaging & DevEx |
 | :--- | :--- | :--- | :--- |
-| **`pure_nim`** | Pure Nim Library / CLI | Nim 2.2+, `nimble` | Single or multi-file layout, Starlight or VitePress docs portal |
+| **`pure_nim`** | Pure Nim Library / CLI | Nim 2.2+, `nimble` | Single or multi-file layout, Starlight docs portal |
 | **`nim_ts_wasm`** | TypeScript WebAssembly Bridge | Nim C-backend + Emscripten / WASM | ESM bindings, TypeScript types, Vitest test suite, npm packaging |
 | **`nim_python_wheel`** | Nim Native Python Wheel | `scikit-build-core`, CMake, `ctypes` | PEP 621 wheels, `cibuildwheel` matrix, pytest test suite |
 | **`headerkit_binding`** | HeaderKit C/C++ Binding Extension | HeaderKit FFI wrapper, C header | Automated FFI generator, foreign symbol tripwire verification |

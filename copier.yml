@@ -59,7 +59,7 @@ flavor:
   type: str
   help: "Select the architectural flavor matrix for the project"
   choices:
-    "Pure Nim Library / CLI (Single or multi-file, Starlight/Vitepress docs, AST docgen)": "pure_nim"
+    "Pure Nim Library / CLI (Single or multi-file, Starlight docs, AST docgen)": "pure_nim"
     "Nim + TypeScript WebAssembly Bridge (ESM, npm packaging, Vite, Vitest)": "nim_ts_wasm"
     "Nim Native Python Wheel (nimpy/C-ABI, scikit-build-core, cibuildwheel)": "nim_python_wheel"
     "HeaderKit C/C++ Binding Extension (headerkit.toml, FFI wrapper, CopierBYOScaffolder)": "headerkit_binding"
@@ -73,7 +73,6 @@ docs_engine:
   help: "Documentation portal engine"
   choices:
     "Astro Starlight (Axiomantic standard with automated AST docgen and Mermaid)": "starlight"
-    "VitePress (Fast Markdown docs with Vite integration)": "vitepress"
     "None (Skip documentation site)": "none"
   default: "starlight"
 
@@ -135,7 +134,6 @@ _exclude:
   - "{% if docs_engine != 'starlight' %}tools{% endif %}"
   - "{% if docs_engine == 'none' %}.github/workflows/docs.yml{% endif %}"
   - "{% if docs_engine != 'starlight' %}docs/astro.config.mjs{% endif %}"
-  - "{% if docs_engine != 'vitepress' %}docs/.vitepress{% endif %}"
 
   # Momus review exclusion
   - "{% if not enable_momus_review %}.github/workflows/momus.yml{% endif %}"

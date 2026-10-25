@@ -41,6 +41,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          nimble install --depsOnly -y
 {%- if flavor == 'nim_ts_wasm' %}
           npm install
 {%- elif flavor == 'nim_python_wheel' %}
@@ -48,7 +49,6 @@ jobs:
 {%- elif flavor == 'headerkit_binding' %}
           python3 -m pip install pyyaml
 {%- endif %}
-          nimble install --depsOnly -y
 
       - name: nph format check
         run: |

@@ -99,6 +99,9 @@ for FLAVOR in "${FLAVORS[@]}"; do
     echo ">>> [TEST] Running test suites for ${FLAVOR}..."
     (cd "${DEST}" && nimble test)
     if [[ "${FLAVOR}" == "nim_ts_wasm" ]]; then
+      echo ">>> [BUILD] Compiling WASM module..."
+      (cd "${DEST}" && bash scripts/compile_wasm.sh)
+      test -f "${DEST}/dist/${PKG_SLUG}.wasm"
       (cd "${DEST}" && npx vitest run)
     elif [[ "${FLAVOR}" == "nim_python_wheel" ]]; then
       (cd "${DEST}" && uv run --with pytest pytest tests_py/)
