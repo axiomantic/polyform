@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Gitleaks secret scanner integration: v8.24.0 in `.pre-commit-config.yaml.jinja`, `gitleaks/gitleaks-action@v2` job in `ci.yml.jinja`, and `check-secrets` recipe in `justfile.jinja` and root `justfile`
+- Default Momus model updated to `anthropic/claude-sonnet-5` in `copier.yml`
+- `PROMPT_SCAFFOLD.md` AI assistant protocol with directory guard, global AGENTS.md greenfield invariant, Copier schema question proxying, and setup/test verification
+- AI Coding Assistant scaffolding documentation in `README.md`
 - Polyform root fixture matrix test runner (tests/test_fixtures.sh), root justfile fixture recipes, and GitHub Actions CI fixture matrix verification for pure_nim, nim_ts_wasm, nim_python_wheel, and headerkit_binding (Task 3.2)
 - Root Copier megatemplate specification (`copier.yml`) supporting `pure_nim`, `nim_ts_wasm`, `nim_python_wheel`, and `headerkit_binding`.
 - Template payload directory (`template/`) with `.copier-answers.yml.jinja` for upstream continuous upgrade tracking.

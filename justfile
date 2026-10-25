@@ -22,3 +22,7 @@ fmt:
 # 5. Clean Temporary Fixtures & Artifacts
 clean:
     rm -rf /tmp/polyform-fixtures-* nimcache site
+
+# 6. Secret Scanning
+check-secrets:
+    gitleaks detect -v

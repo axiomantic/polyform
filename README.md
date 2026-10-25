@@ -44,6 +44,27 @@ You can generate downstream repositories directly from GitHub's Web UI:
 2. Once created, Polyform's automated GitHub Actions bootstrap workflow ([`bootstrap.yml`](.github/workflows/bootstrap.yml)) detects initial repository creation.
 3. The workflow runs Copier auto-hydration with your repository name, initializes git tracking, self-deletes the bootstrap harness, and commits the clean project payload directly to `main`.
 
+### 3. Scaffold with an AI Coding Assistant
+
+When pairing with an AI coding assistant (Claude Code, Antigravity, OpenCode, Cursor, Codex), use [`PROMPT_SCAFFOLD.md`](PROMPT_SCAFFOLD.md) to safely scaffold new projects with zero guessing.
+
+Instruct your assistant:
+> "Read `PROMPT_SCAFFOLD.md` and help me scaffold a new Nim project."
+
+You can also register the greenfield invariant in your global `~/AGENTS.md` (or `~/.gemini/AGENTS.md`):
+
+```markdown
+## Greenfield Invariant
+When new proj, ASK user if they want Polyform template. If yes, read:
+ (clone  there if miss).
+```
+
+The assistant will:
+1. Ask and confirm your project intent and check the target directory.
+2. Proxy Copier configuration questions (flavor, metadata, licensing, review tools) rather than hallucinating answers.
+3. Execute non-interactive `uvx copier copy` without blocking on interactive prompts.
+4. Run `just setup`, `just test`, `just lint`, and `just check-secrets` to verify the generated project is 100% green before handing off.
+
 ---
 
 ## Downstream Project Workflow

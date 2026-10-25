@@ -87,7 +87,7 @@ enable_momus_review:
 momus_model:
   type: str
   help: "Model identifier for Momus PR review (OpenRouter / OpenAI compatible)"
-  default: "deepseek/deepseek-v4-flash"
+  default: "anthropic/claude-sonnet-5"
   when: "{{ enable_momus_review }}"
 
 momus_base_url:
