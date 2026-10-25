@@ -69,9 +69,18 @@ for FLAVOR in "${FLAVORS[@]}"; do
     -d docs_engine="${DOCS_ENGINE}" \
     "${REPO_ROOT}" "${DEST}"
 
-  echo ">>> [VERIFY] Checking .copier-answers.yml and workflows presence..."
+  echo ">>> [VERIFY] Checking .copier-answers.yml, workflows, and justfile extension hooks..."
   test -f "${DEST}/.copier-answers.yml"
   test -f "${DEST}/.github/workflows/ci.yml"
+  grep -q "import? 'justfile.local'" "${DEST}/justfile"
+  echo "test-hook:" > "${DEST}/justfile.local"
+  echo "    @echo 'local-hook-active'" >> "${DEST}/justfile.local"
+  LOCAL_HOOK_OUT=$(cd "${DEST}" && just test-hook)
+  rm -f "${DEST}/justfile.local"
+  if [[ "${LOCAL_HOOK_OUT}" != "local-hook-active" ]]; then
+    echo "ERROR: justfile.local extension hook failed to execute in ${FLAVOR}" >&2
+    exit 1
+  fi
 
   echo ">>> [SETUP] Installing required toolchain dependencies for ${FLAVOR}..."
   if [[ "${FLAVOR}" == "nim_ts_wasm" ]]; then

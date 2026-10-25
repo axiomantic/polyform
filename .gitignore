@@ -12,3 +12,4 @@ site/
 .idea/
 .vscode/
 *.swp
+justfile.local

@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clean root legacy artifacts and establish Polyform storefront (Task 5.2)
 - Add Astro Starlight documentation portal templates, tools/docgen.nim, and rendered repo GitHub Actions workflows (ci.yml, docs.yml, auto-tag.yml, momus.yml) (Task 5.1)
 - Harden fixture test harness to test Starlight docs build and assert CI workflows, eliminating green mirage (Task 5.3)
+- Add optional justfile.local extension hook to template and root justfiles for local recipe overrides
 - Remediate advanced code review findings (WASM export, FFI lifetime, VitePress purge, docgen paths, CI ordering)
 
 ### Removed

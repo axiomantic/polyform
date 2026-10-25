@@ -1,3 +1,5 @@
+import? 'justfile.local'
+
 default:
     @just --list
 
