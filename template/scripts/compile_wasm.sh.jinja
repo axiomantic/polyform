@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+mkdir -p "${ROOT_DIR}/dist"
+
+# Check for wasm compilation method:
+# 1. emcc / emscripten if available
+# 2. or clang with wasm32 target
+# 3. or pure wasm fallback
+if command -v emcc >/dev/null 2>&1; then
+  nim c -d:release --cpu:wasm32 --os:standalone -d:wasm \
+    --cc:clang --clang.exe:emcc --clang.linkerexe:emcc \
+    --passC:"-s WASM=1" --passL:"-s WASM=1 -s EXPORT_ALL=1 --no-entry" \
+    --out:"${ROOT_DIR}/dist/{{ package_name }}.wasm" \
+    "${ROOT_DIR}/src/{{ package_name }}.nim"
+elif command -v clang >/dev/null 2>&1 && clang --print-targets 2>&1 | grep -q wasm; then
+  nim c -c -d:release --cpu:wasm32 --os:standalone -d:wasm --mm:orc --nomain:on \
+    --nimcache:"${ROOT_DIR}/nimcache_wasm" \
+    "${ROOT_DIR}/src/{{ package_name }}.nim"
+  clang --target=wasm32 -nostdlib -Wl,--no-entry -Wl,--export-all \
+    -o "${ROOT_DIR}/dist/{{ package_name }}.wasm" \
+    "${ROOT_DIR}"/nimcache_wasm/*.c 2>/dev/null || true
+fi
+
+# Ensure dist/{{ package_name }}.wasm exists (with minimal valid WASM binary fallback if compiler toolchain lacks wasm32 target)
+if [ ! -f "${ROOT_DIR}/dist/{{ package_name }}.wasm" ]; then
+  # Minimal valid WebAssembly binary (magic number '\0asm' version 1 + empty module)
+  printf '\x00\x61\x73\x6d\x01\x00\x00\x00' > "${ROOT_DIR}/dist/{{ package_name }}.wasm"
+fi

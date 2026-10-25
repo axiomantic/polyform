@@ -110,29 +110,32 @@ _exclude:
   - "{% if flavor != 'nim_ts_wasm' %}package-lock.json{% endif %}"
   - "{% if flavor != 'nim_ts_wasm' %}tsconfig.json{% endif %}"
   - "{% if flavor != 'nim_ts_wasm' %}vitest.config.ts{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}ts/**{% endif %}"
+  - "{% if flavor != 'nim_ts_wasm' %}ts{% endif %}"
   - "{% if flavor != 'nim_ts_wasm' %}scripts/compile_wasm.sh{% endif %}"
   - "{% if flavor != 'nim_ts_wasm' %}tests/test_ts_bridge.ts{% endif %}"
 
   # Flavor C: nim_python_wheel exclusions
   - "{% if flavor != 'nim_python_wheel' %}pyproject.toml{% endif %}"
   - "{% if flavor != 'nim_python_wheel' %}CMakeLists.txt{% endif %}"
-  - "{% if flavor != 'nim_python_wheel' %}src_py/**{% endif %}"
-  - "{% if flavor != 'nim_python_wheel' %}tests_py/**{% endif %}"
+  - "{% if flavor != 'nim_python_wheel' %}src_py{% endif %}"
+  - "{% if flavor != 'nim_python_wheel' %}tests_py{% endif %}"
   - "{% if flavor != 'nim_python_wheel' %}.github/workflows/cibuildwheel.yml{% endif %}"
 
   # Flavor D: headerkit_binding exclusions
   - "{% if flavor != 'headerkit_binding' %}headerkit.toml{% endif %}"
-  - "{% if flavor != 'headerkit_binding' %}include/**{% endif %}"
+  - "{% if flavor != 'headerkit_binding' %}include{% endif %}"
   - "{% if flavor != 'headerkit_binding' %}scripts/generate_bindings.py{% endif %}"
   - "{% if flavor != 'headerkit_binding' %}tests/test_tripwire.nim{% endif %}"
 
+  # Combined scripts exclusion if neither flavor B nor D is active
+  - "{% if flavor != 'nim_ts_wasm' and flavor != 'headerkit_binding' %}scripts{% endif %}"
+
   # Documentation engine exclusions
-  - "{% if docs_engine == 'none' %}docs/**{% endif %}"
+  - "{% if docs_engine == 'none' %}docs{% endif %}"
   - "{% if docs_engine == 'none' %}tools/docgen.nim{% endif %}"
   - "{% if docs_engine == 'none' %}.github/workflows/docs.yml{% endif %}"
   - "{% if docs_engine != 'starlight' %}docs/astro.config.mjs{% endif %}"
-  - "{% if docs_engine != 'vitepress' %}docs/.vitepress/**{% endif %}"
+  - "{% if docs_engine != 'vitepress' %}docs/.vitepress{% endif %}"
 
   # Momus review exclusion
   - "{% if not enable_momus_review %}.github/workflows/momus.yml{% endif %}"

@@ -1,0 +1,16 @@
+/**
+ * {{ project_name }} - {{ description }}
+ * TypeScript + WebAssembly Entrypoint
+ */
+
+export * from './types.js';
+export * from './runtime.js';
+
+import { {{ package_name | title | replace('_', '') }}Bridge } from './runtime.js';
+
+export async function create{{ package_name | title | replace('_', '') }}(): Promise<{{ package_name | title | replace('_', '') }}Bridge> {
+  const bridge = new {{ package_name | title | replace('_', '') }}Bridge();
+  return await bridge.init();
+}
+
+export default create{{ package_name | title | replace('_', '') }};

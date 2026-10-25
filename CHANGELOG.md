@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Compiler build configuration (`template/nim.cfg`) with deterministic ORC memory management and threading.
 - Initial project structure from template.
 - Baseline template files and canonical justfile across all flavors (Task 1.2)
+- Implement Flavor B (Nim + TypeScript/WASM bridge) with ESM packaging, Vite runtime, and Vitest suite (Task 2.1)

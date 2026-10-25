@@ -1,0 +1,29 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { {{ package_name | title | replace('_', '') }}Bridge, create{{ package_name | title | replace('_', '') }} } from '../ts/index.js';
+
+describe('{{ project_name }} TypeScript / WASM Bridge', () => {
+  let bridge: {{ package_name | title | replace('_', '') }}Bridge;
+
+  beforeEach(async () => {
+    bridge = await create{{ package_name | title | replace('_', '') }}();
+  });
+
+  it('initializes and reports ready state', () => {
+    expect(bridge.ready).toBe(true);
+  });
+
+  it('invokes hello returning expected greeting', () => {
+    const greeting = bridge.hello();
+    expect(greeting).toBe('hello from {{ package_name }} WASM bridge');
+  });
+
+  it('performs arithmetic add operation across boundary', () => {
+    const result = bridge.add(21, 21);
+    expect(result).toBe(42);
+  });
+
+  it('verifies negative controls', () => {
+    expect(bridge.add(0, 0)).toBe(0);
+    expect(bridge.add(-5, 5)).toBe(0);
+  });
+});
