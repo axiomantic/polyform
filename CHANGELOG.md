@@ -14,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial project structure from template.
 - Baseline template files and canonical justfile across all flavors (Task 1.2)
 - Implement Flavor B (Nim + TypeScript/WASM bridge) with ESM packaging, Vite runtime, and Vitest suite (Task 2.1)
+- Flavor D (HeaderKit C/C++ Binding Extension): headerkit.toml.jinja, include/ C header and implementation, bindings generator script, and test_tripwire symbol verification (Task 2.3)

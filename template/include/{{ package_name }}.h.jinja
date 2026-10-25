@@ -1,0 +1,16 @@
+#ifndef {{ package_name | upper }}_H
+#define {{ package_name | upper }}_H
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int32_t {{ package_name }}_add(int32_t a, int32_t b);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* {{ package_name | upper }}_H */
