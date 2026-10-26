@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2026-10-26
+
+### Changed
+- Default Momus Review Model: Updated default `momus_model` in `copier.yml` to `~anthropic/claude-sonnet-latest` (OpenRouter family-floating alias for latest Claude Sonnet). Updated `PROMPT_SCAFFOLD.md` and test fixture matrix assertions.
+
+## [0.1.5] - 2026-10-26
+
+### Added
+- Momus Environment Scoping: Added `environment: code-review` and `secrets: inherit` to `.github/workflows/momus.yml.jinja` to support repositories with scoped environment secrets out of the box.
+
 ## [0.1.4] - 2026-10-25
 
 ### Security

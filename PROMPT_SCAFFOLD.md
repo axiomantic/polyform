@@ -65,7 +65,7 @@ Inspect `copier.yml` parameters. Prompt the user for any missing parameters, or 
 | `flavor` | `choice` | `pure_nim` | Architectural flavor topology (see below) |
 | `docs_engine` | `choice` | `starlight` | Documentation engine (`starlight` or `none`) |
 | `enable_momus_review` | `bool` | `true` | Include Momus AI PR review workflow |
-| `momus_model` | `str` | `anthropic/claude-sonnet-5` | Model identifier for Momus review |
+| `momus_model` | `str` | `~anthropic/claude-sonnet-latest` | Model identifier for Momus review |
 | `momus_base_url` | `str` | `https://openrouter.ai/api/v1` | Momus API endpoint base URL |
 | `license` | `choice` | `MIT` | `MIT`, `Apache-2.0`, `BSD-3-Clause`, `Unlicense` |
 
@@ -93,7 +93,7 @@ uvx copier copy --trust \
   -d flavor="<flavor>" \
   -d docs_engine="<docs_engine>" \
   -d enable_momus_review=<true|false> \
-  -d momus_model="anthropic/claude-sonnet-5" \
+  -d momus_model="~anthropic/claude-sonnet-latest" \
   -d momus_base_url="https://openrouter.ai/api/v1" \
   -d license="<license>" \
   gh:axiomantic/polyform "<target_dir>"

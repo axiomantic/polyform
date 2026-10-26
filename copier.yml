@@ -87,7 +87,7 @@ enable_momus_review:
 momus_model:
   type: str
   help: "Model identifier for Momus PR review (OpenRouter / OpenAI compatible)"
-  default: "anthropic/claude-sonnet-5"
+  default: "~anthropic/claude-sonnet-latest"
   when: "{{ enable_momus_review }}"
 
 momus_base_url:
