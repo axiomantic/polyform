@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-10-25
+
+### Security
+- Momus Workflow Hardening: Added default-deny `permissions: {}` at top-level, PR-level concurrency control, coarse pre-filtering `if:` condition at caller job level to prevent bot spam or non-trigger comments from scheduling runner VMs, and explicit `only_collaborators: true` to prevent external PRs from draining LLM API quotas.
+- Fleet Workflow Hardening: Declared top-level `permissions: {}` across all template workflows (`ci.yml.jinja`, `cibuildwheel.yml.jinja`, `docs.yml.jinja`, `auto-tag.yml.jinja`, `dependabot-verify.yml.jinja`) and root workflows, strictly granting least-privilege permissions only at job level.
+- Shell Injection Sanitization: Sanitized expression interpolations in `bootstrap.yml` to pass dynamic values strictly via `env:` blocks rather than inline inside bash `run:` scripts.
+- Documentation & Guidance: Updated `NEXT_STEPS.md.jinja` and `AGENTS.md.jinja` with security gating details (collaborator gating and maintainer `/ai-review` triggering on external forks).
+
 ## [0.1.3] - 2026-10-25
 
 ### Fixed

@@ -69,7 +69,7 @@ Documentation lives in `docs/` powered by Starlight with automated API extractio
 ### Momus AI PR Review (`momus.yml`)
 The `momus.yml` workflow calls `axiomantic/.github/.github/workflows/momus.yml@devel`.
 It requires `secrets.LLM_API_KEY` (configured at the repo or org level).
-Momus runs on newly opened PRs and can be triggered on comments via `/ai-review` or `@axiomantic-momus[bot]`.
+Momus is securely gated to repository maintainers/collaborators. It runs automatically on internal PRs, and can be triggered on comments via `/ai-review` or `@axiomantic-momus[bot]`. External forks require an explicit maintainer `/ai-review` comment to run.
 {% endif %}
 
 ### `nph` version coupling

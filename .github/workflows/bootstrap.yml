@@ -2,14 +2,15 @@ name: Polyform Auto-Hydration
 on:
   push:
     branches: [main, master]
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   hydrate:
     # Only run on newly spawned repositories, never on polyform template itself
     if: github.repository != 'axiomantic/polyform' && hashFiles('copier.yml') != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -33,13 +34,17 @@ jobs:
           echo "slug=${REPO_SLUG}" >> "$GITHUB_OUTPUT"
 
       - name: Render Template In-Place
+        env:
+          META_NAME: ${{ steps.meta.outputs.name }}
+          META_SLUG: ${{ steps.meta.outputs.slug }}
+          META_OWNER: ${{ steps.meta.outputs.owner }}
         run: |
           # Render template to temporary staging directory
           uvx copier copy --trust --defaults \
-            -d project_name="${{ steps.meta.outputs.name }}" \
-            -d repo_name="${{ steps.meta.outputs.name }}" \
-            -d package_name="${{ steps.meta.outputs.slug }}" \
-            -d github_owner="${{ steps.meta.outputs.owner }}" \
+            -d project_name="$META_NAME" \
+            -d repo_name="$META_NAME" \
+            -d package_name="$META_SLUG" \
+            -d github_owner="$META_OWNER" \
             -d flavor="pure_nim" \
             -d docs_engine="starlight" \
             . /tmp/hydrated

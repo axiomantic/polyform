@@ -4,13 +4,14 @@ on:
     branches: [main]
   pull_request:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   secrets-scan:
     name: Secrets Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,6 +22,8 @@ jobs:
 
   test:
     runs-on: {% raw %}${{ matrix.os }}{% endraw %}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
