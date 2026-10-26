@@ -46,7 +46,5 @@ jobs:
       model: {{ momus_model }}
       base_url: {{ momus_base_url }}
       only_collaborators: true
-    secrets:
-      LLM_API_KEY: {% raw %}${{ secrets.LLM_API_KEY }}{% endraw %}
-      MOMUS_APP_ID: {% raw %}${{ secrets.MOMUS_APP_ID }}{% endraw %}
-      MOMUS_APP_PRIVATE_KEY: {% raw %}${{ secrets.MOMUS_APP_PRIVATE_KEY }}{% endraw %}
+      environment: code-review
+    secrets: inherit

@@ -91,6 +91,8 @@ for FLAVOR in "${FLAVORS[@]}"; do
   grep -q "model: anthropic/claude-sonnet-5" "${DEST}/.github/workflows/momus.yml"
   grep -q "base_url: https://openrouter.ai/api/v1" "${DEST}/.github/workflows/momus.yml"
   grep -q "only_collaborators: true" "${DEST}/.github/workflows/momus.yml"
+  grep -q "environment: code-review" "${DEST}/.github/workflows/momus.yml"
+  grep -q "secrets: inherit" "${DEST}/.github/workflows/momus.yml"
   grep -q "permissions: {}" "${DEST}/.github/workflows/momus.yml"
   grep -q "github.event.sender.type != 'Bot'" "${DEST}/.github/workflows/momus.yml"
   grep -q "anthropic/claude-sonnet-5" "${DEST}/.momus.yaml"
