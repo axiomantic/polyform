@@ -22,8 +22,12 @@
     "dist"
   ],
   "scripts": {
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
     "build": "bash scripts/compile_wasm.sh && tsc",
     "compile:wasm": "bash scripts/compile_wasm.sh",
+{%- else %}
+    "build": "tsc",
+{%- endif %}
     "compile:ts": "tsc",
     "test": "vitest run",
     "lint": "tsc --noEmit",
