@@ -20,8 +20,10 @@ jobs:
         run: |
           curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v8.24.0/gitleaks_8.24.0_linux_x64.tar.gz" | sudo tar -xz -C /usr/local/bin gitleaks
           gitleaks detect --verbose --redact
+{%- if has_nim %}
 
-  test:
+  test-nim:
+    name: Nim ({% raw %}${{ matrix.nim-version }}, ${{ matrix.os }}{% endraw %})
     runs-on: {% raw %}${{ matrix.os }}{% endraw %}
     permissions:
       contents: read
@@ -29,52 +31,32 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-{%- if has_nim %}
         nim-version: [stable, "2.2.6", devel]
-{%- endif %}
     steps:
       - uses: actions/checkout@v4
-{%- if has_nim %}
 
       - uses: jiro4989/setup-nim-action@v2
         with:
           nim-version: {% raw %}${{ matrix.nim-version }}{% endraw %}
           parent-nim-install-directory: {% raw %}${{ runner.temp }}{% endraw %}
-{%- endif %}
-{%- if has_typescript %}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-{%- endif %}
-{%- if has_python or (has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}
+{%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 {%- endif %}
-{%- if has_nim %}
 
       - uses: actions/cache@v5
         with:
           path: ~/.nimble
           key: nimble-{% raw %}${{ runner.os }}-${{ hashFiles('**/*.nimble') }}{% endraw %}
-{%- endif %}
 
       - name: Install dependencies
         run: |
-{%- if has_nim %}
           nimble install --depsOnly -y
-{%- endif %}
-{%- if has_typescript %}
-          npm install
-{%- endif %}
-{%- if has_python %}
-          python3 -m pip install -e ".[dev]"
-{%- elif has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
+{%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
           python3 -m pip install pyyaml
 {%- endif %}
-{%- if has_nim %}
 
       - name: nph format check
         run: |
@@ -85,29 +67,85 @@ jobs:
       - name: nimble check
         run: nimble check
         continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
-{%- endif %}
-{%- if has_typescript %}
-
-      - name: npm lint
-        run: npm run lint
-{%- endif %}
-{%- if has_python %}
-
-      - name: ruff check
-        run: ruff check .
-{%- endif %}
 
       - name: Test
-        run: |
-{%- if has_nim %}
-          nimble test
-{%- endif %}
-{%- if has_typescript %}
-          npm run test
+        run: nimble test
+        continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
 {%- endif %}
 {%- if has_python %}
-          pytest tests_py/
+
+  test-python:
+    name: Python (3.12)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          parent-nim-install-directory: {% raw %}${{ runner.temp }}{% endraw %}
 {%- endif %}
-{%- if has_nim %}
-        continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+          nimble install --depsOnly -y
+{%- endif %}
+          uv pip install --system -e ".[dev]"
+
+      - name: ruff check
+        run: uv run ruff check .
+
+      - name: pytest
+        run: uv run pytest tests_py/
+{%- endif %}
+{%- if has_typescript %}
+
+  test-typescript:
+    name: TypeScript (Node 20)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
+
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: stable
+          parent-nim-install-directory: {% raw %}${{ runner.temp }}{% endraw %}
+{%- endif %}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
+          nimble install --depsOnly -y
+{%- endif %}
+          npm install
+
+      - name: TypeScript Lint / Typecheck
+        run: npm run lint
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
+
+      - name: Compile WASM Module
+        run: bash scripts/compile_wasm.sh
+{%- endif %}
+
+      - name: Vitest Suite
+        run: npx vitest run
 {%- endif %}

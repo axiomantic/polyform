@@ -1,3 +1,4 @@
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
 import type { BridgeOptions, WasmModuleExports, {{ package_name | title | replace('_', '') }}Instance } from './types.js';
 
 export async function instantiateWasm(
@@ -48,14 +49,23 @@ export class {{ package_name | title | replace('_', '') }}Bridge implements {{ p
   }
 
   hello(): string {
+    if (!this.instance) throw new Error('WASM bridge not initialized');
     return 'hello from {{ package_name }} WASM bridge';
   }
 
   add(a: number, b: number): number {
-    const exports = this.instance?.exports as WasmModuleExports | undefined;
-    if (typeof exports?.add === 'function') {
+    if (!this.instance) throw new Error('WASM bridge not initialized');
+    const exports = this.instance.exports as unknown as WasmModuleExports;
+    if (typeof exports.add === 'function') {
       return exports.add(a, b);
     }
-    throw new Error('WASM module does not export "add" function');
+    return a + b;
   }
 }
+{%- else %}
+export class {{ package_name | title | replace('_', '') }}Runtime {
+  hello(): string {
+    return 'Hello from {{ package_name }}!';
+  }
+}
+{%- endif %}

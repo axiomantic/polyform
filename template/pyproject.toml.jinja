@@ -1,6 +1,12 @@
+{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
 [build-system]
 requires = ["scikit-build-core>=0.9.0"]
 build-backend = "scikit_build_core.build"
+{%- else %}
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+{%- endif %}
 
 [project]
 name = "{{ repo_name }}"
@@ -15,24 +21,33 @@ license = { text = "{{ license }}" }
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+{%- if has_nim %}
     "Programming Language :: Nim",
+{%- endif %}
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
     "ruff>=0.3.0",
+{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
     "scikit-build-core>=0.9.0",
     "cmake>=3.18",
+{%- endif %}
 ]
 test = [
     "pytest>=7.0.0",
 ]
 
+{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
 [tool.scikit-build]
 wheel.packages = ["src_py/{{ package_name }}"]
 build.verbose = true
 install.strip = false
+{%- else %}
+[tool.hatch.build.targets.wheel]
+packages = ["src_py/{{ package_name }}"]
+{%- endif %}
 
 [tool.pytest.ini_options]
 testpaths = ["tests_py"]

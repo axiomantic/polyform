@@ -36,6 +36,14 @@ jobs:
       - name: Install mkdocs (nim variant)
         run: pip install mkdocs-material mkdocstrings-nim
       - name: Build
-        run: mkdocs build --strict
+        run: |
+          if [ -f mkdocs.yml ]; then
+            mkdocs build --strict
+          else
+            echo "No root mkdocs.yml found; skipping template root docs build."
+          fi
       - name: Deploy to gh-pages
-        run: mkdocs gh-deploy --force
+        run: |
+          if [ -f mkdocs.yml ]; then
+            mkdocs gh-deploy --force
+          fi

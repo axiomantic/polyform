@@ -8,17 +8,18 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_typescript %}
 
-  # npm ecosystem for TypeScript / WASM bridge
+  # npm ecosystem for TypeScript packages
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
 
-  # pip ecosystem for Python wheel dependencies
+  # pip ecosystem for Python dependencies
   - package-ecosystem: "pip"
     directory: "/"
     schedule:

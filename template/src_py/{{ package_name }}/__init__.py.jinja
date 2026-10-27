@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
 import ctypes
 import importlib.util
 import sys
@@ -85,3 +86,23 @@ def version() -> str:
 
 
 __all__ = ["add", "hello", "version"]
+{%- else %}
+def hello() -> str:
+    """Return greeting string."""
+    return "hello from {{ package_name }}"
+
+
+def add(a: int, b: int) -> int:
+    """Add two integers."""
+    if not isinstance(a, int) or not isinstance(b, int):
+        raise TypeError("Arguments must be integers")
+    return a + b
+
+
+def version() -> str:
+    """Return package version."""
+    return "0.0.1"
+
+
+__all__ = ["add", "hello", "version"]
+{%- endif %}

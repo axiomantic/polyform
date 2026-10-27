@@ -7,7 +7,7 @@ permissions: {}
 jobs:
   hydrate:
     # Only run on newly spawned repositories, never on polyform template itself
-    if: github.repository != 'axiomantic/polyform' && hashFiles('copier.yml') != ''
+    if: github.repository != 'axiomantic/polyform'
     runs-on: ubuntu-latest
     permissions:
       contents: write

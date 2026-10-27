@@ -11,7 +11,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: jiro4989/setup-nim-action@v2
         with: { nim-version: stable }
-      - run: nimble build -d:release
+      - run: |
+          if ls *.nimble 1> /dev/null 2>&1; then
+            nimble build -d:release
+          else
+            echo "Template repository: no root .nimble package to build."
+          fi
       - uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true

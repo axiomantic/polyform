@@ -1,11 +1,16 @@
 /**
  * {{ project_name }} - {{ description }}
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
  * TypeScript + WebAssembly Entrypoint
+{%- else %}
+ * TypeScript Entrypoint
+{%- endif %}
  */
 
 export * from './types.js';
 export * from './runtime.js';
 
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
 import { {{ package_name | title | replace('_', '') }}Bridge } from './runtime.js';
 
 export async function create{{ package_name | title | replace('_', '') }}(): Promise<{{ package_name | title | replace('_', '') }}Bridge> {
@@ -14,3 +19,10 @@ export async function create{{ package_name | title | replace('_', '') }}(): Pro
 }
 
 export default create{{ package_name | title | replace('_', '') }};
+{%- else %}
+export function hello(): string {
+  return "Hello from {{ package_name }}!";
+}
+
+export default hello;
+{%- endif %}

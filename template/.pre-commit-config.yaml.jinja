@@ -20,6 +20,7 @@ repos:
       - id: check-case-conflict
   - repo: local
     hooks:
+{%- if has_nim %}
       - id: nph
         name: nph (Nim formatter, PINNED to v0.7.0 — must match ci.yml install)
         entry: nph
@@ -33,18 +34,20 @@ repos:
         language: system
         files: \.(nim|nimble)$
         pass_filenames: false
-{% if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
       - id: ts-lint
         name: npm run lint
         entry: npm run lint
         language: system
         files: \.(ts|js|json)$
         pass_filenames: false
-{% elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
       - id: ruff-check
         name: ruff check
         entry: ruff check
         language: system
         files: \.py$
         pass_filenames: false
-{% endif %}
+{%- endif %}

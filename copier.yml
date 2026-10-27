@@ -190,7 +190,7 @@ _exclude:
 
   # 5. Overlap Bridge exclusions
   - "{% if not (has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm') %}scripts/compile_wasm.sh{% endif %}"
-  - "{% if not (has_nim and has_typescript) %}tests/test_ts_bridge.ts{% endif %}"
+  - "{% if not has_typescript %}tests/test_ts_bridge.ts{% endif %}"
   - "{% if not (has_nim and has_python) %}.github/workflows/cibuildwheel.yml{% endif %}"
   - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}headerkit.toml{% endif %}"
   - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}scripts/generate_bindings.py{% endif %}"

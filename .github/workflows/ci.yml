@@ -6,18 +6,25 @@ permissions: {}
 
 jobs:
   fixture-matrix:
-    name: Fixture (${{ matrix.flavor }})
+    name: Fixture (${{ matrix.fixture }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        flavor: [pure_nim, nim_ts_wasm, nim_python_wheel, headerkit_binding]
+        fixture:
+          - fixture-pure-nim
+          - fixture-pure-py
+          - fixture-pure-ts
+          - fixture-nim-ts
+          - fixture-nim-py
+          - fixture-nim-c
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: extra-actions/setup-just@v2
       - uses: jiro4989/setup-nim-action@v2
         with:
           nim-version: stable
@@ -35,5 +42,5 @@ jobs:
         run: |
           nimble install -y nph@0.7.0
           echo "$HOME/.nimble/bin" >> $GITHUB_PATH
-      - name: Verify fixture ${{ matrix.flavor }}
-        run: bash tests/test_fixtures.sh ${{ matrix.flavor }} all
+      - name: Verify fixture ${{ matrix.fixture }}
+        run: bash tests/test_fixtures.sh ${{ matrix.fixture }} all

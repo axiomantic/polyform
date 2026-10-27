@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
 import { {{ package_name | title | replace('_', '') }}Bridge, create{{ package_name | title | replace('_', '') }} } from '../ts/index.js';
 
 describe('{{ project_name }} TypeScript / WASM Bridge', () => {
@@ -27,3 +28,13 @@ describe('{{ project_name }} TypeScript / WASM Bridge', () => {
     expect(bridge.add(-5, 5)).toBe(0);
   });
 });
+{%- else %}
+import { hello } from '../ts/index.js';
+
+describe('{{ project_name }} TypeScript Native Package', () => {
+  it('invokes hello returning expected greeting', () => {
+    const greeting = hello();
+    expect(greeting).toBe('Hello from {{ package_name }}!');
+  });
+});
+{%- endif %}

@@ -24,21 +24,26 @@ tools/docgen
 {% endif %}
 {% endif %}
 
-{% if flavor == 'nim_ts_wasm' %}
-# TypeScript / WASM artifacts
+{% if has_typescript %}
+# TypeScript artifacts
 node_modules/
 dist/
+{% if ts_bridge_strategy == 'wasm' %}
 *.wasm
-{% elif flavor == 'nim_python_wheel' %}
-# Python wheel artifacts
+{% endif %}
+{% endif %}
+{% if has_python %}
+# Python artifacts
 __pycache__/
 *.pyc
 build/
 *.egg-info/
 .pytest_cache/
 .venv/
-{% elif flavor == 'headerkit_binding' %}
-# HeaderKit artifacts
+{% endif %}
+{% if has_c_cpp %}
+# Foreign C/C++ artifacts
 *.o
 *.a
+build/
 {% endif %}
