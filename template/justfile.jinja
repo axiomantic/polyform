@@ -5,14 +5,17 @@ default:
 
 # 1. Dependency Setup
 setup:
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_typescript %}
     npm install
+{%- endif %}
+{%- if has_nim %}
     nimble install --depsOnly -y
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
     python3 -m pip install -e ".[dev]"
-    nimble install --depsOnly -y
-{%- else %}
-    nimble install --depsOnly -y
+{%- endif %}
+{%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
+    python3 -m pip install pyyaml
 {%- endif %}
 {%- if docs_engine == 'starlight' %}
     cd docs && npm install
@@ -20,61 +23,133 @@ setup:
 
 # 2. Test Suite Execution
 test:
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_nim %}
+    @just test-nim
+{%- endif %}
+{%- if has_python %}
+    @just test-py
+{%- endif %}
+{%- if has_typescript %}
+    @just test-ts
+{%- endif %}
+
+{%- if has_nim %}
+
+test-nim:
     nimble test
-    npm run test
-{%- elif flavor == 'nim_python_wheel' %}
-    nimble test
-    pytest tests_py/
-{%- else %}
-    nimble test
+{%- endif %}
+{%- if has_python %}
+
+test-py:
+    uv run pytest tests_py
+{%- endif %}
+{%- if has_typescript %}
+
+test-ts:
+{%- if has_nim and (ts_bridge_strategy | default('none')) == 'wasm' %}
+    @just compile-wasm
+{%- endif %}
+    npx vitest run
 {%- endif %}
 
 # 3. Linter Execution
 lint:
+{%- if has_nim %}
+    @just lint-nim
+{%- endif %}
+{%- if has_python %}
+    @just lint-py
+{%- endif %}
+{%- if has_typescript %}
+    @just lint-ts
+{%- endif %}
+
+{%- if has_nim %}
+
+lint-nim:
     nph --check .
     nimble check
-{%- if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_python %}
+
+lint-py:
+    uv run ruff check .
+{%- endif %}
+{%- if has_typescript %}
+
+lint-ts:
     npm run lint
-{%- elif flavor == 'nim_python_wheel' %}
-    ruff check .
 {%- endif %}
 
 # 4. Formatter Execution
 fmt:
+{%- if has_nim %}
     nph .
-{%- if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
     npm run fmt
-{%- elif flavor == 'nim_python_wheel' %}
-    ruff format .
+{%- endif %}
+{%- if has_python %}
+    uv run ruff format .
 {%- endif %}
 
 # 5. Build Artifacts
 build:
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm' %}
+    @just compile-wasm
     npm run build
-{%- elif flavor == 'nim_python_wheel' %}
-    python -m build --wheel
-{%- else %}
+{%- elif has_nim and has_python and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+    @just build-wheel
+{%- elif has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
+    @just gen-bindings
     nimble build -d:release
+{%- elif has_nim %}
+    nimble build -d:release
+{%- elif has_typescript %}
+    npm run build
+{%- elif has_python %}
+    python3 -m build --wheel
+{%- endif %}
+
+{%- if has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm' %}
+
+# Compile Nim to WebAssembly
+compile-wasm:
+    bash scripts/compile_wasm.sh
+{%- endif %}
+{%- if has_nim and has_python %}
+
+# Build native Python extension wheel
+build-wheel:
+    python3 -m build --wheel
+{%- endif %}
+{%- if has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
+
+# Generate HeaderKit foreign C bindings
+gen-bindings:
+    python3 scripts/generate_bindings.py
 {%- endif %}
 
 {%- if docs_engine == 'starlight' %}
 
 # 6. Documentation Dev Server
 docs:
+{%- if has_nim %}
     nimble docgen
+{%- endif %}
     cd docs && npm run dev
 
 # 7. Documentation Production Build
 docs-build:
+{%- if has_nim %}
     nimble docgen
+{%- endif %}
     cd docs && npm run build
 {%- endif %}
 
 # 8. Clean Build Artifacts
 clean:
-    rm -rf nimcache htmldocs site docs/dist docs/.astro tools/docgen
+    rm -rf nimcache htmldocs site docs/dist docs/.astro tools/docgen dist .venv
     find . -name '*.exe' -delete
 
 # 9. Secret Scanning
