@@ -1,8 +1,17 @@
-{% raw %}name: Auto Tag
+name: Auto Tag
 on:
   push:
     branches: [main]
-    paths: ["*.nimble"]
+    paths:
+{%- if flavor == 'nim_ts_wasm' %}
+      - "package.json"
+      - "*.nimble"
+{%- elif flavor == 'nim_python_wheel' %}
+      - "pyproject.toml"
+      - "*.nimble"
+{%- else %}
+      - "*.nimble"
+{%- endif %}
 permissions: {}
 
 jobs:
@@ -13,20 +22,54 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0, token: "${{ secrets.GITHUB_TOKEN }}" }
+        with: { fetch-depth: 0, token: "{% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}" }
+{%- if flavor == 'nim_ts_wasm' %}
+      - name: Extract version from package.json or .nimble
+        id: ver
+        run: |
+          VERSION=""
+          if [ -f package.json ]; then
+            VERSION=$(node -p "require('./package.json').version" 2>/dev/null || true)
+          fi
+          if [ -z "$VERSION" ] || [ "$VERSION" = "undefined" ]; then
+            NIMBLE=$(ls *.nimble 2>/dev/null | head -1)
+            if [ -n "$NIMBLE" ]; then
+              VERSION=$(grep -m1 -E '^version\s*=\s*"' "$NIMBLE" | sed -E 's/^version\s*=\s*"([^"]+)".*/\1/')
+            fi
+          fi
+          [ -z "$VERSION" ] && { echo "no version found in package.json or .nimble"; exit 1; }
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+{%- elif flavor == 'nim_python_wheel' %}
+      - name: Extract version from pyproject.toml or .nimble
+        id: ver
+        run: |
+          VERSION=""
+          if [ -f pyproject.toml ]; then
+            VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])" 2>/dev/null || true)
+          fi
+          if [ -z "$VERSION" ]; then
+            NIMBLE=$(ls *.nimble 2>/dev/null | head -1)
+            if [ -n "$NIMBLE" ]; then
+              VERSION=$(grep -m1 -E '^version\s*=\s*"' "$NIMBLE" | sed -E 's/^version\s*=\s*"([^"]+)".*/\1/')
+            fi
+          fi
+          [ -z "$VERSION" ] && { echo "no version found in pyproject.toml or .nimble"; exit 1; }
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+{%- else %}
       - name: Extract version from .nimble
         id: ver
         run: |
-          NIMBLE=$(ls *.nimble | head -1)
+          NIMBLE=$(ls *.nimble 2>/dev/null | head -1)
+          [ -z "$NIMBLE" ] && { echo "no .nimble file found"; exit 1; }
           VERSION=$(grep -m1 -E '^version\s*=\s*"' "$NIMBLE" | sed -E 's/^version\s*=\s*"([^"]+)".*/\1/')
-          [ -z "$VERSION" ] && { echo "no version"; exit 1; }
+          [ -z "$VERSION" ] && { echo "no version found in $NIMBLE"; exit 1; }
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+{%- endif %}
       - name: Tag if not exists
-        env: { VERSION: "${{ steps.ver.outputs.version }}" }
+        env: { VERSION: "{% raw %}${{ steps.ver.outputs.version }}{% endraw %}" }
         run: |
           git rev-parse "v$VERSION" >/dev/null 2>&1 && { echo "Tag v$VERSION exists"; exit 0; }
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag "v$VERSION"
           git push origin "v$VERSION"
-{% endraw %}

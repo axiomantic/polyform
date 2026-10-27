@@ -95,6 +95,12 @@ for FLAVOR in "${FLAVORS[@]}"; do
   grep -q "secrets: inherit" "${DEST}/.github/workflows/momus.yml"
   grep -q "permissions: {}" "${DEST}/.github/workflows/momus.yml"
   grep -q "github.event.sender.type != 'Bot'" "${DEST}/.github/workflows/momus.yml"
+  test -f "${DEST}/.github/workflows/auto-tag.yml"
+  if [[ "${FLAVOR}" == "nim_ts_wasm" ]]; then
+    grep -q "package.json" "${DEST}/.github/workflows/auto-tag.yml"
+  elif [[ "${FLAVOR}" == "nim_python_wheel" ]]; then
+    grep -q "pyproject.toml" "${DEST}/.github/workflows/auto-tag.yml"
+  fi
   grep -q "~anthropic/claude-sonnet-latest" "${DEST}/.momus.yaml"
   grep -q "https://openrouter.ai/api/v1" "${DEST}/.momus.yaml"
   grep -q "import? 'justfile.local'" "${DEST}/justfile"
