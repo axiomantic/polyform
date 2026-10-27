@@ -18,7 +18,7 @@ setup:
     python3 -m pip install pyyaml
 {%- endif %}
 {%- if docs_engine == 'starlight' %}
-    cd docs && npm install
+    cd docs && npm install --legacy-peer-deps
 {%- endif %}
 
 # 2. Test Suite Execution

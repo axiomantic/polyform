@@ -255,7 +255,7 @@ for FIXTURE in "${FIXTURES[@]}"; do
     (cd "${DEST}" && npm install --no-audit --no-fund)
   fi
   if [[ "${DOCS_ENGINE}" == "starlight" ]]; then
-    (cd "${DEST}/docs" && npm install --no-audit --no-fund)
+    (cd "${DEST}/docs" && npm install --no-audit --no-fund --legacy-peer-deps)
   fi
 
   # LINT VERIFICATION
