@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-27
+
 ### Added
 - Composable Multi-Facet Scaffolding: Decoupled monolithic flavors into independent composable facet flags (`has_nim`, `has_python`, `has_typescript`, `has_c_cpp`) with conditional bridge strategies (`ts_bridge_strategy`, `python_bridge_strategy`, `c_binding_strategy`).
 - Modular Justfile Targets: Added modular language test (`test-nim`, `test-py`, `test-ts`), lint (`lint-nim`, `lint-py`, `lint-ts`), and format recipes in `template/justfile.jinja`, dynamically bound to top-level `test`, `lint`, and `fmt`.
