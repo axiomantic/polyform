@@ -41,7 +41,7 @@ test-nim:
 {%- if has_python %}
 
 test-py:
-    uv run pytest tests_py
+    uv run --with pytest pytest tests_py
 {%- endif %}
 {%- if has_typescript %}
 
@@ -73,7 +73,7 @@ lint-nim:
 {%- if has_python %}
 
 lint-py:
-    uv run ruff check .
+    uv run --with ruff ruff check .
 {%- endif %}
 {%- if has_typescript %}
 
@@ -90,7 +90,7 @@ fmt:
     npm run fmt
 {%- endif %}
 {%- if has_python %}
-    uv run ruff format .
+    uv run --with ruff ruff format .
 {%- endif %}
 
 # 5. Build Artifacts

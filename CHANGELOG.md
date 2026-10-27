@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Composable Multi-Facet Scaffolding: Decoupled monolithic flavors into independent composable facet flags (`has_nim`, `has_python`, `has_typescript`, `has_c_cpp`) with conditional bridge strategies (`ts_bridge_strategy`, `python_bridge_strategy`, `c_binding_strategy`).
+- Modular Justfile Targets: Added modular language test (`test-nim`, `test-py`, `test-ts`), lint (`lint-nim`, `lint-py`, `lint-ts`), and format recipes in `template/justfile.jinja`, dynamically bound to top-level `test`, `lint`, and `fmt`.
+- Composable CI Workflows: Refactored `template/.github/workflows/ci.yml.jinja` into independent matrix jobs (`test-nim`, `test-python`, `test-typescript`) rendered conditionally according to active facets and bridge strategies.
+- Expanded Fixture Verification: Six canonical fixture profiles (`fixture-pure-nim`, `fixture-pure-py`, `fixture-pure-ts`, `fixture-nim-ts`, `fixture-nim-py`, `fixture-nim-c`) with negative control assertions ensuring zero language carcasses in single-facet downstream repositories.
+
+### Fixed
+- Root Workflow CI Fixes: Added `setup-just@v2` action to `.github/workflows/ci.yml` before fixture execution.
+- Bootstrap Workflow: Removed invalid job-level `hashFiles()` evaluation from `.github/workflows/bootstrap.yml`.
+- Root Docs & Release Workflows: Added existence guards to prevent failing on non-existent `mkdocs.yml` or root `.nimble` builds in Copier template repository.
+
 ## [0.1.6] - 2026-10-26
 
 ### Changed

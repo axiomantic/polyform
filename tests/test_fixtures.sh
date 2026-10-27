@@ -168,7 +168,7 @@ for FIXTURE in "${FIXTURES[@]}"; do
   # Auto-tag workflow target checks
   test -f "${DEST}/.github/workflows/auto-tag.yml"
   if [[ "${HAS_NIM}" == "true" ]]; then
-    grep -q "${PKG_SLUG}.nimble" "${DEST}/.github/workflows/auto-tag.yml"
+    grep -E -q '(\*\.nimble|'"${PKG_SLUG}"'\.nimble)' "${DEST}/.github/workflows/auto-tag.yml"
   elif [[ "${HAS_PYTHON}" == "true" ]]; then
     grep -q "pyproject.toml" "${DEST}/.github/workflows/auto-tag.yml"
   elif [[ "${HAS_TYPESCRIPT}" == "true" ]]; then

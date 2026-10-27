@@ -1,6 +1,6 @@
 from __future__ import annotations
-
 {%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+
 import ctypes
 import importlib.util
 import sys
@@ -87,6 +87,7 @@ def version() -> str:
 
 __all__ = ["add", "hello", "version"]
 {%- else %}
+
 def hello() -> str:
     """Return greeting string."""
     return "hello from {{ package_name }}"
