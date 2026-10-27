@@ -3,13 +3,13 @@ on:
   push:
     branches: [main]
     paths:
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_typescript %}
       - "package.json"
-      - "*.nimble"
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
       - "pyproject.toml"
-      - "*.nimble"
-{%- else %}
+{%- endif %}
+{%- if has_nim %}
       - "*.nimble"
 {%- endif %}
 permissions: {}
@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0, token: "{% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}" }
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_typescript %}
       - name: Extract version from package.json or .nimble
         id: ver
         run: |
@@ -39,7 +39,7 @@ jobs:
           fi
           [ -z "$VERSION" ] && { echo "no version found in package.json or .nimble"; exit 1; }
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-{%- elif flavor == 'nim_python_wheel' %}
+{%- elif has_python %}
       - name: Extract version from pyproject.toml or .nimble
         id: ver
         run: |
@@ -55,7 +55,7 @@ jobs:
           fi
           [ -z "$VERSION" ] && { echo "no version found in pyproject.toml or .nimble"; exit 1; }
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-{%- else %}
+{%- elif has_nim %}
       - name: Extract version from .nimble
         id: ver
         run: |

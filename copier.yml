@@ -53,20 +53,68 @@ github_owner:
   default: "axiomantic"
 
 # ----------------------------------------------------------------------
-# 2. Flavor Topology Selection
+# 2. Composable Language & Toolchain Facets
 # ----------------------------------------------------------------------
 flavor:
   type: str
-  help: "Select the architectural flavor matrix for the project"
-  choices:
-    "Pure Nim Library / CLI (Single or multi-file, Starlight docs, AST docgen)": "pure_nim"
-    "Nim + TypeScript WebAssembly Bridge (ESM, npm packaging, Vite, Vitest)": "nim_ts_wasm"
-    "Nim Native Python Wheel (nimpy/C-ABI, scikit-build-core, cibuildwheel)": "nim_python_wheel"
-    "HeaderKit C/C++ Binding Extension (headerkit.toml, FFI wrapper, CopierBYOScaffolder)": "headerkit_binding"
-  default: "pure_nim"
+  when: false
+  default: "custom"
+
+has_nim:
+  type: bool
+  help: "Include Nim toolchain (Nimble, nph, compiler matrix)?"
+  default: "{{ flavor in ['pure_nim', 'nim_ts_wasm', 'nim_python_wheel', 'headerkit_binding', 'custom', ''] }}"
+
+has_python:
+  type: bool
+  help: "Include Python toolchain (uv, ruff, pytest)?"
+  default: "{{ flavor == 'nim_python_wheel' }}"
+
+has_typescript:
+  type: bool
+  help: "Include TypeScript toolchain (package.json, tsconfig, vitest)?"
+  default: "{{ flavor == 'nim_ts_wasm' }}"
+
+has_c_cpp:
+  type: bool
+  help: "Include C/C++ foreign interop toolchain (headers, CMake shims)?"
+  default: "{{ flavor == 'headerkit_binding' }}"
 
 # ----------------------------------------------------------------------
-# 3. Documentation Engine Selection
+# 3. Interop Bridge Strategies
+# ----------------------------------------------------------------------
+python_bridge_strategy:
+  type: str
+  help: "Python bridge integration strategy"
+  choices:
+    "nimpy (Nim-Python high-level FFI bindings)": "nimpy"
+    "C-ABI / ctypes (scikit-build-core shared library wrapper)": "ctypes_cabi"
+    "None (Independent parallel Python package)": "none"
+  when: "{{ has_nim and has_python }}"
+  default: "{{ 'ctypes_cabi' if flavor == 'nim_python_wheel' else 'nimpy' }}"
+
+ts_bridge_strategy:
+  type: str
+  help: "TypeScript bridge integration strategy"
+  choices:
+    "WebAssembly (WASM compiler, browser/Node runtime)": "wasm"
+    "N-API (Node native addon bindings)": "napi"
+    "None (Independent parallel TypeScript package)": "none"
+  when: "{{ has_nim and has_typescript }}"
+  default: "wasm"
+
+c_binding_strategy:
+  type: str
+  help: "C/C++ binding integration strategy"
+  choices:
+    "HeaderKit (headerkit.toml, automated FFI wrapper generator)": "headerkit"
+    "CMake Static / Shared library": "cmake_static"
+    "None (Direct foreign header compilation)": "none"
+  when: "{{ has_nim and has_c_cpp }}"
+  default: "headerkit"
+
+# ----------------------------------------------------------------------
+# 4. Documentation Engine Selection
 # ----------------------------------------------------------------------
 docs_engine:
   type: str
@@ -77,7 +125,7 @@ docs_engine:
   default: "starlight"
 
 # ----------------------------------------------------------------------
-# 4. Ecosystem Features & Review Tooling
+# 5. Ecosystem Features & Review Tooling
 # ----------------------------------------------------------------------
 enable_momus_review:
   type: bool
@@ -107,7 +155,7 @@ license:
   default: "MIT"
 
 # ----------------------------------------------------------------------
-# 5. Conditional File Exclusion Rules
+# 6. Conditional File Exclusion Rules
 # ----------------------------------------------------------------------
 _exclude:
   # Universal hygiene
@@ -116,30 +164,40 @@ _exclude:
   - "*.pyc"
   - "__pycache__"
 
-  # Flavor B: nim_ts_wasm exclusions
-  - "{% if flavor != 'nim_ts_wasm' %}/package.json{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}/package-lock.json{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}/tsconfig.json{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}vitest.config.ts{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}ts{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}scripts/compile_wasm.sh{% endif %}"
-  - "{% if flavor != 'nim_ts_wasm' %}tests/test_ts_bridge.ts{% endif %}"
+  # 1. Nim payload exclusions
+  - "{% if not has_nim %}/{{ package_name }}.nimble{% endif %}"
+  - "{% if not has_nim %}src{% endif %}"
+  - "{% if not has_nim and not has_typescript and not (has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}tests{% endif %}"
+  - "{% if not has_nim %}/nim.cfg{% endif %}"
+  - "{% if not has_nim %}tests/config.nims{% endif %}"
+  - "{% if not has_nim %}tests/test_{{ package_name }}.nim{% endif %}"
 
-  # Flavor C: nim_python_wheel exclusions
-  - "{% if flavor != 'nim_python_wheel' %}pyproject.toml{% endif %}"
-  - "{% if flavor != 'nim_python_wheel' %}CMakeLists.txt{% endif %}"
-  - "{% if flavor != 'nim_python_wheel' %}src_py{% endif %}"
-  - "{% if flavor != 'nim_python_wheel' %}tests_py{% endif %}"
-  - "{% if flavor != 'nim_python_wheel' %}.github/workflows/cibuildwheel.yml{% endif %}"
+  # 2. Python payload exclusions
+  - "{% if not has_python %}pyproject.toml{% endif %}"
+  - "{% if not has_python %}src_py{% endif %}"
+  - "{% if not has_python %}tests_py{% endif %}"
 
-  # Flavor D: headerkit_binding exclusions
-  - "{% if flavor != 'headerkit_binding' %}headerkit.toml{% endif %}"
-  - "{% if flavor != 'headerkit_binding' %}include{% endif %}"
-  - "{% if flavor != 'headerkit_binding' %}scripts/generate_bindings.py{% endif %}"
-  - "{% if flavor != 'headerkit_binding' %}tests/test_tripwire.nim{% endif %}"
+  # 3. TypeScript payload exclusions
+  - "{% if not has_typescript %}/package.json{% endif %}"
+  - "{% if not has_typescript %}/package-lock.json{% endif %}"
+  - "{% if not has_typescript %}/tsconfig.json{% endif %}"
+  - "{% if not has_typescript %}vitest.config.ts{% endif %}"
+  - "{% if not has_typescript %}ts{% endif %}"
 
-  # Combined scripts exclusion if neither flavor B nor D is active
-  - "{% if flavor != 'nim_ts_wasm' and flavor != 'headerkit_binding' %}scripts{% endif %}"
+  # 4. Foreign C/C++ exclusions
+  - "{% if not has_c_cpp %}include{% endif %}"
+  - "{% if not (has_c_cpp or (has_nim and has_python and (python_bridge_strategy | default('none')) == 'ctypes_cabi')) %}CMakeLists.txt{% endif %}"
+
+  # 5. Overlap Bridge exclusions
+  - "{% if not (has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm') %}scripts/compile_wasm.sh{% endif %}"
+  - "{% if not (has_nim and has_typescript) %}tests/test_ts_bridge.ts{% endif %}"
+  - "{% if not (has_nim and has_python) %}.github/workflows/cibuildwheel.yml{% endif %}"
+  - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}headerkit.toml{% endif %}"
+  - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}scripts/generate_bindings.py{% endif %}"
+  - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}tests/test_tripwire.nim{% endif %}"
+
+  # Combined scripts exclusion if neither WASM nor HeaderKit scripts are needed
+  - "{% if not (has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm') and not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}scripts{% endif %}"
 
   # Documentation engine exclusions
   - "{% if docs_engine == 'none' %}docs{% endif %}"
@@ -152,14 +210,15 @@ _exclude:
   - "{% if not enable_momus_review %}.momus.yaml{% endif %}"
 
 # ----------------------------------------------------------------------
-# 6. Post-Copy Lifecycle Tasks
+# 7. Post-Copy Lifecycle Tasks
 # ----------------------------------------------------------------------
 _tasks:
   - "test -d .git || git init -q"
   - >-
     bash -c '
     printf "\n\033[1;36m======================================================================\033[0m\n"
-    printf "\033[1;32m  Polyform: Scaffolding Complete for %s (%s)\033[0m\n" "{{ repo_name }}" "{{ flavor }}"
+    printf "\033[1;32m  Polyform: Scaffolding Complete for %s\033[0m\n" "{{ repo_name }}"
+    printf "  Facets: Nim=%s, Python=%s, TS=%s, C/C++=%s\n" "{{ has_nim }}" "{{ has_python }}" "{{ has_typescript }}" "{{ has_c_cpp }}"
     printf "\033[1;36m======================================================================\033[0m\n"
     printf "  \033[1mNext Steps:\033[0m\n"
     printf "    1. cd %s\n" "{{ repo_name }}"

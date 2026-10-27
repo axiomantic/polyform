@@ -5,13 +5,13 @@ default:
 
 # 1. Dependency Setup
 setup:
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_typescript %}
     npm install
-    nimble install --depsOnly -y
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
     python3 -m pip install -e ".[dev]"
-    nimble install --depsOnly -y
-{%- else %}
+{%- endif %}
+{%- if has_nim %}
     nimble install --depsOnly -y
 {%- endif %}
 {%- if docs_engine == 'starlight' %}
@@ -20,43 +20,51 @@ setup:
 
 # 2. Test Suite Execution
 test:
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_nim %}
     nimble test
+{%- endif %}
+{%- if has_typescript %}
     npm run test
-{%- elif flavor == 'nim_python_wheel' %}
-    nimble test
+{%- endif %}
+{%- if has_python %}
     pytest tests_py/
-{%- else %}
-    nimble test
 {%- endif %}
 
 # 3. Linter Execution
 lint:
+{%- if has_nim %}
     nph --check .
     nimble check
-{%- if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
     npm run lint
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
     ruff check .
 {%- endif %}
 
 # 4. Formatter Execution
 fmt:
+{%- if has_nim %}
     nph .
-{%- if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
     npm run fmt
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
     ruff format .
 {%- endif %}
 
 # 5. Build Artifacts
 build:
-{%- if flavor == 'nim_ts_wasm' %}
+{%- if has_typescript and (ts_bridge_strategy | default('none')) == 'wasm' %}
     npm run build
-{%- elif flavor == 'nim_python_wheel' %}
+{%- elif has_python and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
     python -m build --wheel
-{%- else %}
+{%- elif has_nim %}
     nimble build -d:release
+{%- else %}
+    @echo "No build target configured for active facets"
 {%- endif %}
 
 {%- if docs_engine == 'starlight' %}
