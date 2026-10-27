@@ -8,7 +8,7 @@ proc hello*(): string =
   ## Returns standard project greeting string.
   greetingMsg
 
-{% if flavor == 'nim_ts_wasm' -%}
+{% if has_typescript and (ts_bridge_strategy | default('none')) == 'wasm' -%}
 proc add*(a, b: int): int {.exportc: "add", cdecl.} =
   ## Adds two integers (exported to WebAssembly).
   a + b
@@ -17,14 +17,15 @@ proc add*(a, b: int): int =
   ## Adds two integers.
   a + b
 {%- endif %}
-{%- if flavor == 'headerkit_binding' %}
+{%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
 
 # HeaderKit C-ABI foreign bindings
 {.compile: "../include/{{ package_name }}.c".}
 
 proc {{ package_name }}_add*(a, b: int32): int32 {.importc: "{{ package_name }}_add", cdecl.}
   ## Computes sum via foreign C entrypoint.
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
 
 # -----------------------------------------------------------------------------
 # C-ABI Exports for Python ctypes / native extension

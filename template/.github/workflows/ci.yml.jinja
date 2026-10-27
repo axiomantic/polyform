@@ -29,41 +29,52 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
+{%- if has_nim %}
         nim-version: [stable, "2.2.6", devel]
+{%- endif %}
     steps:
       - uses: actions/checkout@v4
+{%- if has_nim %}
 
       - uses: jiro4989/setup-nim-action@v2
         with:
           nim-version: {% raw %}${{ matrix.nim-version }}{% endraw %}
           parent-nim-install-directory: {% raw %}${{ runner.temp }}{% endraw %}
-{%- if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-{%- elif flavor in ['nim_python_wheel', 'headerkit_binding'] %}
+{%- endif %}
+{%- if has_python or (has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 {%- endif %}
+{%- if has_nim %}
 
       - uses: actions/cache@v5
         with:
           path: ~/.nimble
           key: nimble-{% raw %}${{ runner.os }}-${{ hashFiles('**/*.nimble') }}{% endraw %}
+{%- endif %}
 
       - name: Install dependencies
         run: |
+{%- if has_nim %}
           nimble install --depsOnly -y
-{%- if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
           npm install
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
           python3 -m pip install -e ".[dev]"
-{%- elif flavor == 'headerkit_binding' %}
+{%- elif has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
           python3 -m pip install pyyaml
 {%- endif %}
+{%- if has_nim %}
 
       - name: nph format check
         run: |
@@ -74,11 +85,13 @@ jobs:
       - name: nimble check
         run: nimble check
         continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
-{%- if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
 
       - name: npm lint
         run: npm run lint
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
 
       - name: ruff check
         run: ruff check .
@@ -86,10 +99,15 @@ jobs:
 
       - name: Test
         run: |
+{%- if has_nim %}
           nimble test
-{%- if flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
           npm run test
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python %}
           pytest tests_py/
 {%- endif %}
+{%- if has_nim %}
         continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
+{%- endif %}

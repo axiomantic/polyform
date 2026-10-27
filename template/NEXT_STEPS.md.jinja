@@ -1,6 +1,10 @@
 # Next Steps for {{ project_name }}
 
-Welcome to your newly scaffolded project! This repository was generated with **Polyform** using the `{{ flavor }}` architectural flavor.
+Welcome to your newly scaffolded project! This repository was generated with **Polyform**{% if flavor and flavor != 'custom' %} (preset: `{{ flavor }}`){% endif %} configured with composable facets:
+- Nim: `{{ has_nim }}`
+- Python: `{{ has_python }}`{% if has_nim and has_python %} (bridge: `{{ python_bridge_strategy }}`){% endif %}
+- TypeScript: `{{ has_typescript }}`{% if has_nim and has_typescript %} (bridge: `{{ ts_bridge_strategy }}`){% endif %}
+- C/C++: `{{ has_c_cpp }}`{% if has_nim and has_c_cpp %} (binding: `{{ c_binding_strategy }}`){% endif %}
 
 Follow this checklist to complete project onboarding and configure CI/CD.
 
@@ -70,11 +74,12 @@ Momus provides automated, noise-filtered AI code reviews on pull requests using 
   - Re-trigger reviews at any time by commenting `/ai-review` or `@axiomantic-momus[bot]`.
 {%- endif %}
 
-{%- if flavor == 'nim_python_wheel' %}
+{%- if has_python %}
 ### PyPI Publishing (`.github/workflows/cibuildwheel.yml`)
 To publish native wheels to PyPI:
 - Configure trusted publishing via PyPI or add `PYPI_API_TOKEN` to **Settings > Secrets and variables > Actions**.
-{%- elif flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript %}
 ### npm Publishing
 To publish the TypeScript / WASM package to npm:
 - Add `NPM_TOKEN` to **Settings > Secrets and variables > Actions**.
@@ -82,23 +87,30 @@ To publish the TypeScript / WASM package to npm:
 
 ---
 
-## 4. Architectural Flavor Details: `{{ flavor }}`
+## 4. Architectural Toolchain Details
 
-{%- if flavor == 'pure_nim' %}
+{%- if has_nim %}
+### Nim Core Library
 - **Core Library Source**: `src/{{ package_name }}.nim`
 - **Nimble Package Definition**: `{{ package_name }}.nimble`
 - **Tests**: `tests/` (run via `just test` or `nimble test`)
-{%- elif flavor == 'nim_ts_wasm' %}
+{%- endif %}
+{%- if has_typescript and (ts_bridge_strategy | default('none')) == 'wasm' %}
+### TypeScript / WebAssembly Bridge
 - **Nim Source & WASM Export**: `src/{{ package_name }}.nim`
 - **TypeScript Runtime & Bridge**: `ts/runtime.ts`, `ts/index.ts`
 - **Vitest Suite**: `tests/test_ts_bridge.ts` (run via `npm test` or `just test`)
 - **WASM Build Script**: `scripts/compile_wasm.sh`
-{%- elif flavor == 'nim_python_wheel' %}
+{%- endif %}
+{%- if has_python and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+### Python Native Extension (ctypes / C-ABI)
 - **Native Extension Source**: `src/{{ package_name }}.nim`
 - **CMake & Wheel Configuration**: `CMakeLists.txt`, `pyproject.toml`
 - **Python Ctypes Wrapper**: `src_py/{{ package_name }}/`
 - **Pytest Suite**: `tests_py/` (run via `pytest tests_py/` or `just test`)
-{%- elif flavor == 'headerkit_binding' %}
+{%- endif %}
+{%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
+### HeaderKit C/C++ Foreign Interop
 - **Foreign C Headers & Implementation**: `include/`
 - **HeaderKit Configuration**: `headerkit.toml`
 - **Bindings Generator**: `scripts/generate_bindings.py`
