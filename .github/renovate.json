@@ -3,7 +3,74 @@
   "extends": [
     "config:recommended"
   ],
-  "nimble": {
-    "enabled": true
-  }
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track npm dependencies in template package.json.jinja files",
+      "fileMatch": [
+        "(^|/)template/.*package\\.json\\.jinja$"
+      ],
+      "matchStrings": [
+        "\"(?:devDependencies|dependencies)\"\\s*:\\s*\\{(?<content>[^}]+)\\}",
+        "\"(?<depName>@[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+|[a-zA-Z0-9_.-]+)\"\\s*:\\s*\"(?<currentValue>[^\"\\r\\n]+)\""
+      ],
+      "matchStringsStrategy": "recursive",
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "Track Python dependencies in template pyproject.toml.jinja",
+      "fileMatch": [
+        "(^|/)template/pyproject\\.toml\\.jinja$"
+      ],
+      "matchStrings": [
+        "[\"'](?<depName>[a-zA-Z0-9_-]+)(?<currentValue>(?:>=|==|~=)[^\"'\\r\\n]+)[\"']"
+      ],
+      "datasourceTemplate": "pypi",
+      "versioningTemplate": "pep440"
+    },
+    {
+      "customType": "regex",
+      "description": "Track GitHub Actions in template workflow files",
+      "fileMatch": [
+        "(^|/)template/\\.github/workflows/.*\\.ya?ml\\.jinja$"
+      ],
+      "matchStrings": [
+        "uses:\\s*[\"']?(?<depName>[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)(?:/[^@\\s]+)?@(?<currentValue>[^\"'\\r\\n\\s]+)[\"']?"
+      ],
+      "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "description": "Track pre-commit hooks in template .pre-commit-config.yaml.jinja",
+      "fileMatch": [
+        "(^|/)template/\\.pre-commit-config\\.yaml\\.jinja$"
+      ],
+      "matchStrings": [
+        "repo:\\s*https://github\\.com/(?<depName>[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)[\\r\\n]+\\s*rev:\\s*[\"']?(?<currentValue>[^\"'\\r\\n\\s]+)[\"']?"
+      ],
+      "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "description": "Track Gitleaks release download in template ci.yml.jinja",
+      "fileMatch": [
+        "(^|/)template/\\.github/workflows/ci\\.yml\\.jinja$"
+      ],
+      "matchStrings": [
+        "https://github\\.com/(?<depName>gitleaks/gitleaks)/releases/download/(?<currentValue>v[0-9.]+)/"
+      ],
+      "datasourceTemplate": "github-tags"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Group template dependency updates into a single PR",
+      "matchFileNames": [
+        "template/**"
+      ],
+      "groupName": "polyform template dependencies",
+      "commitMessagePrefix": "chore(template):"
+    }
+  ]
 }

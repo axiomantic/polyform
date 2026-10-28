@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Renovate Template Tracking & Regex Managers: Configured Renovate custom regex managers in root `.github/renovate.json` to monitor dependencies across `template/` payload files (`package.json.jinja`, `pyproject.toml.jinja`, `.github/workflows/*.yml.jinja`, `.pre-commit-config.yaml.jinja`).
+- Downstream Continuous Template Upgrades: Added regex manager in `template/.github/renovate.json.jinja` matching `.copier-answers.yml` (`_commit` / `_src_path: gh:axiomantic/polyform`) to automatically submit PRs with `just update-template` instructions whenever upstream Polyform releases a new version.
+- Renovate Schema Validation: Purged unsupported top-level `nimble` key and added `renovate-config-validator` CI verification in `.github/workflows/dependabot-verify.yml` and downstream template.
+
 ## [0.2.0] - 2026-10-27
 
 ### Added

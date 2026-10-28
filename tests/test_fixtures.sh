@@ -130,6 +130,21 @@ for FIXTURE in "${FIXTURES[@]}"; do
   test -f "${DEST}/NEXT_STEPS.md"
   test -f "${DEST}/.momus.yaml"
   test -f "${DEST}/.github/renovate.json"
+  python3 -c '
+import json, re
+with open("'"${DEST}"'/.github/renovate.json", "r") as f:
+    data = json.load(f)
+assert "extends" in data, "renovate.json missing extends"
+assert "config:recommended" in data["extends"], "renovate.json missing config:recommended"
+assert "nimble" not in data, "renovate.json contains unsupported top-level nimble option"
+assert "customManagers" in data, "renovate.json missing customManagers"
+for cm in data["customManagers"]:
+    for s in cm.get("matchStrings", []):
+        py_s = re.sub(r"\(\?<([a-zA-Z0-9_]+)>", r"(?P<\1>", s)
+        re.compile(py_s)
+print("Renovate configuration validated successfully.")
+'
+  npx --yes --package renovate renovate-config-validator "${DEST}/.github/renovate.json"
   test -f "${DEST}/.github/dependabot.yml"
 
   if grep -q 'package-ecosystem: "nimble"' "${DEST}/.github/dependabot.yml"; then
