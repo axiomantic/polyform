@@ -56,14 +56,16 @@ except ImportError:
 if _phyne is not None and hasattr(_phyne, "load_cffi_library"):
     _lib = _phyne.load_cffi_library(
         str(_lib_path),
-        cdef="void nim_init(void); int32_t {{ package_name }}_add(int32_t a, int32_t b); const char* nim_hello(void); long long nim_add(long long a, long long b); const char* nim_version(void);",
+        cdef=(
+            "void nim_init(void); "
+            "int32_t {{ package_name }}_add(int32_t a, int32_t b); "
+            "const char* nim_hello(void); "
+            "long long nim_add(long long a, long long b); "
+            "const char* nim_version(void);"
+        ),
     )
-    _c_init = getattr(_lib, "nim_init", None)
-    _c_add = getattr(_lib, "{{ package_name }}_add", getattr(_lib, "nim_add", None))
 else:
     _lib = ctypes.CDLL(str(_lib_path))
-    _c_init = getattr(_lib, "nim_init", None)
-    _c_add = getattr(_lib, "nim_add", None)
 {%- else -%}
 # Load library via ctypes
 _lib = ctypes.CDLL(str(_lib_path))
