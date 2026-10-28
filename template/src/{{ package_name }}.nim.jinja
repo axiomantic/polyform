@@ -25,17 +25,21 @@ proc add*(a, b: int): int =
 proc {{ package_name }}_add*(a, b: int32): int32 {.importc: "{{ package_name }}_add", cdecl.}
   ## Computes sum via foreign C entrypoint.
 {%- endif %}
-{%- if has_python and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+{%- if has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
 
 # -----------------------------------------------------------------------------
-# C-ABI Exports for Python ctypes / native extension
+# C-ABI Exports for Python phyne / ctypes / native extension
 # -----------------------------------------------------------------------------
+import std/atomics
+
+var gNimMainInitialized: Atomic[bool]
 
 proc NimMain*() {.cdecl, importc.}
 
 proc nim_init*() {.cdecl, exportc, dynlib.} =
-  ## Explicit runtime initialization for C-ABI / ctypes loading.
-  NimMain()
+  ## Thread-safe idempotent runtime initialization for C-ABI / phyne / ctypes loading.
+  if not gNimMainInitialized.exchange(true, moAcquireRelease):
+    NimMain()
 
 proc nim_hello*(): cstring {.cdecl, exportc, dynlib.} =
   ## Exported greeting proc returning static cstring buffer.

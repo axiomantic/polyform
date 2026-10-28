@@ -1,5 +1,5 @@
 from __future__ import annotations
-{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
 
 import ctypes
 import importlib.util

@@ -1,0 +1,2 @@
+primary_branch = "main"
+test_command = "bash tests/test_fixtures.sh fixture-nim-py all"

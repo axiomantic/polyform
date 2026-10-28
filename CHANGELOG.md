@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Free-Threaded Python (`3.13t`, `3.14t` / PEP 703 `nogil`) CI & Wheel Matrix:** Added `python_freethreaded_ci` option in `copier.yml` (default `true`) expanding `template/.github/workflows/ci.yml.jinja` `test-python` matrix to `["3.12", "3.13t", "3.14t"]` and enabling `CIBW_ENABLE: cpython-freethreaded` in `template/.github/workflows/cibuildwheel.yml.jinja`.
+- **Nimony (Nim 3.0 Preview) Compatibility CI & Justfile Recipe:** Added `nimony_ci` option in `copier.yml` (default `true`) adding a Nimony 3.0 / strict definitions check step in `template/.github/workflows/ci.yml.jinja` and a `check-nimony` recipe in `template/justfile.jinja`.
+- **`phyne` Python Bridge Strategy & Thread-Safe `NimMain()` Guard:** Added `phyne` option to `python_bridge_strategy` in `copier.yml` and guarded `nim_init()` in `template/src/{{ package_name }}.nim.jinja` with an atomic once-only `gNimMainInitialized` check for free-threaded Python safety.
+
 ## [0.2.2] - 2026-10-28
 
 ### Fixed

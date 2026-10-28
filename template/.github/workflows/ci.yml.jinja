@@ -73,17 +73,40 @@ jobs:
       - name: Test
         run: nimble test
         continue-on-error: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
+{%- if nimony_ci | default(true) %}
+
+      - name: Nimony 3.0 Compatibility Check
+        if: {% raw %}${{ matrix.nim-version == 'devel' }}{% endraw %}
+        continue-on-error: true
+        run: |
+          if command -v nimony >/dev/null 2>&1; then
+            nimony check src/{{ package_name }}.nim
+          else
+            nim check --experimental:strictFuncs --experimental:strictDefs src/{{ package_name }}.nim
+          fi
+{%- endif %}
 {%- endif %}
 {%- if has_python %}
 
   test-python:
+{%- if python_freethreaded_ci | default(true) %}
+    name: Python ({% raw %}${{ matrix.python-version }}{% endraw %})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13t", "3.14t"]
+{%- else %}
     name: Python (3.12)
     runs-on: ubuntu-latest
     permissions:
       contents: read
+{%- endif %}
     steps:
       - uses: actions/checkout@v4
-{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
 
       - uses: jiro4989/setup-nim-action@v2
         with:
@@ -98,11 +121,16 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
+{%- if python_freethreaded_ci | default(true) %}
+          python-version: {% raw %}${{ matrix.python-version }}{% endraw %}
+          allow-prereleases: true
+{%- else %}
           python-version: "3.12"
+{%- endif %}
 
       - name: Install dependencies
         run: |
-{%- if has_nim and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
           nimble install --depsOnly -y
 {%- endif %}
           uv pip install --system -e ".[dev]"

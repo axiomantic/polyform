@@ -208,6 +208,8 @@ print("Renovate configuration validated successfully.")
     test -f "${DEST}/nim.cfg"
     test -d "${DEST}/src"
     test -f "${DEST}/tests/test_${PKG_SLUG}.nim"
+    grep -q "Nimony 3.0 Compatibility Check" "${DEST}/.github/workflows/ci.yml"
+    grep -q "check-nimony:" "${DEST}/justfile"
   fi
 
   # Negative control: non-python fixtures must not have Python artifacts
@@ -219,6 +221,12 @@ print("Renovate configuration validated successfully.")
     test -f "${DEST}/pyproject.toml"
     test -d "${DEST}/src_py"
     test -d "${DEST}/tests_py"
+    grep -q '"3.13t"' "${DEST}/.github/workflows/ci.yml"
+    grep -q '"3.14t"' "${DEST}/.github/workflows/ci.yml"
+    if [[ "${HAS_NIM}" == "true" ]]; then
+      grep -q "CIBW_ENABLE: cpython-freethreaded" "${DEST}/.github/workflows/cibuildwheel.yml"
+      grep -q "gNimMainInitialized" "${DEST}/src/${PKG_SLUG}.nim"
+    fi
   fi
 
   # Negative control: non-typescript fixtures must not have root TS package.json
@@ -264,6 +272,45 @@ print("Renovate configuration validated successfully.")
     test ! -f "${MOMUS_NEG_DEST}/.github/workflows/momus.yml"
     rm -rf "${MOMUS_NEG_DEST}"
     echo ">>> [VERIFY] Negative control passed: .momus.yaml and momus.yml successfully excluded."
+  fi
+
+  if [[ "${FIXTURE}" == "fixture-nim-py" ]]; then
+    echo ">>> [VERIFY] Negative control: verifying nimony_ci=false and python_freethreaded_ci=false exclusions and phyne bridge..."
+    FT_NEG_DEST="${FIXTURE_DIR}/ft_nimony_neg_test"
+    uvx copier copy --vcs-ref=HEAD --trust --defaults \
+      -d project_name="FT Nimony Neg Test" \
+      -d repo_name="ft-nimony-neg-test" \
+      -d package_name="ft_nimony_neg_test" \
+      -d has_nim=true \
+      -d has_python=true \
+      -d python_bridge_strategy="phyne" \
+      -d python_freethreaded_ci=false \
+      -d nimony_ci=false \
+      -d has_typescript=false \
+      -d has_c_cpp=false \
+      -d docs_engine="none" \
+      -d enable_momus_review=false \
+      "${REPO_ROOT}" "${FT_NEG_DEST}"
+    if grep -q "Nimony 3.0 Compatibility Check" "${FT_NEG_DEST}/.github/workflows/ci.yml"; then
+      echo "ERROR: nimony_ci=false still rendered Nimony 3.0 Compatibility Check in ci.yml" >&2
+      exit 1
+    fi
+    if grep -q "check-nimony:" "${FT_NEG_DEST}/justfile"; then
+      echo "ERROR: nimony_ci=false still rendered check-nimony in justfile" >&2
+      exit 1
+    fi
+    if grep -q '"3.13t"' "${FT_NEG_DEST}/.github/workflows/ci.yml"; then
+      echo "ERROR: python_freethreaded_ci=false still rendered 3.13t in ci.yml" >&2
+      exit 1
+    fi
+    if grep -q "cpython-freethreaded" "${FT_NEG_DEST}/.github/workflows/cibuildwheel.yml"; then
+      echo "ERROR: python_freethreaded_ci=false still rendered cpython-freethreaded in cibuildwheel.yml" >&2
+      exit 1
+    fi
+    grep -q "bridge: \`phyne\`" "${FT_NEG_DEST}/NEXT_STEPS.md"
+    test -f "${FT_NEG_DEST}/CMakeLists.txt"
+    rm -rf "${FT_NEG_DEST}"
+    echo ">>> [VERIFY] Negative control passed: nimony_ci=false, python_freethreaded_ci=false, and phyne bridge verified."
   fi
 
   echo ">>> [SETUP] Installing required toolchain dependencies for ${FIXTURE}..."
