@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-10-28
+
+### Fixed
+- **Atomic Gitleaks Download Upgrades:** Refactored Gitleaks CI download in `template/.github/workflows/ci.yml.jinja` to assign `GITLEAKS_VERSION` variable, preventing Renovate replacement from producing mismatched tarball download URLs (HTTP 404).
+- **Universal Toolchain Setup Acceleration:** Added `repo-token: ${{ secrets.GITHUB_TOKEN }}` to all secondary `setup-nim-action` steps across `template/ci.yml.jinja` (`test-python`, `test-typescript`), `template/docs.yml.jinja`, and root workflows (`docs.yml`, `release.yml`).
+- **Template CI Gating:** Expanded `paths:` triggers in `.github/workflows/dependabot-verify.yml` to monitor template payload files (`template/.github/dependabot.yml.jinja`, `template/.github/renovate.json.jinja`).
+- **Parser Robustness:** Hardened `.copier-answers.yml` Renovate regex in downstream template to cleanly strip `.git` extensions, support SSH git URLs, and tolerate inline comments.
+
 ## [0.2.1] - 2026-10-28
 
 ### Added

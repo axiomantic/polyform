@@ -58,9 +58,11 @@
         "(^|/)template/\\.github/workflows/ci\\.yml\\.jinja$"
       ],
       "matchStrings": [
-        "https://github\\.com/(?<depName>gitleaks/gitleaks)/releases/download/(?<currentValue>v[0-9.]+)/"
+        "GITLEAKS_VERSION=\"(?<currentValue>[0-9.]+)\""
       ],
-      "datasourceTemplate": "github-tags"
+      "depNameTemplate": "gitleaks/gitleaks",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ],
   "packageRules": [

@@ -6,11 +6,17 @@ on:
       - ".github/dependabot.yml"
       - ".github/renovate.json"
       - ".github/workflows/dependabot-verify.yml"
+      - "template/.github/dependabot.yml.jinja"
+      - "template/.github/renovate.json.jinja"
+      - "template/.github/workflows/dependabot-verify.yml.jinja"
   pull_request:
     paths:
       - ".github/dependabot.yml"
       - ".github/renovate.json"
       - ".github/workflows/dependabot-verify.yml"
+      - "template/.github/dependabot.yml.jinja"
+      - "template/.github/renovate.json.jinja"
+      - "template/.github/workflows/dependabot-verify.yml.jinja"
 
 permissions: {}
 

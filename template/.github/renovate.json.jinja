@@ -11,8 +11,8 @@
         "(^|/)\\.copier-answers\\.ya?ml$"
       ],
       "matchStrings": [
-        "_commit:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?\\s*[\\r\\n]+_src_path:\\s*[\"']?(?:gh:|https://github\\.com/)?(?<depName>[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)[\"']?",
-        "_src_path:\\s*[\"']?(?:gh:|https://github\\.com/)?(?<depName>[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)[\"']?\\s*[\\r\\n]+_commit:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+        "_commit:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?\\s*(?:#[^\\r\\n]*)?[\\r\\n]+_src_path:\\s*[\"']?(?:gh:|https://github\\.com/|git@github\\.com:)?(?<depName>[a-zA-Z0-9_.-]+/[a-zA-Z0-9_-]+)(?:\\.git)?[\"']?",
+        "_src_path:\\s*[\"']?(?:gh:|https://github\\.com/|git@github\\.com:)?(?<depName>[a-zA-Z0-9_.-]+/[a-zA-Z0-9_-]+)(?:\\.git)?[\"']?\\s*(?:#[^\\r\\n]*)?[\\r\\n]+_commit:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
       ],
       "datasourceTemplate": "github-tags"
     },
@@ -23,9 +23,11 @@
         "(^|/)\\.github/workflows/ci\\.ya?ml$"
       ],
       "matchStrings": [
-        "https://github\\.com/(?<depName>gitleaks/gitleaks)/releases/download/(?<currentValue>v[0-9.]+)/"
+        "GITLEAKS_VERSION=\"(?<currentValue>[0-9.]+)\""
       ],
-      "datasourceTemplate": "github-tags"
+      "depNameTemplate": "gitleaks/gitleaks",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ],
   "packageRules": [

@@ -16,6 +16,7 @@ jobs:
         with:
           nim-version: stable
           parent-nim-install-directory: ${{ runner.temp }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Make Nim compiler module importable
         # mkdocstrings-nim's extractor compiles a helper that does
         # `import compiler/ast` etc. The compiler module ships at

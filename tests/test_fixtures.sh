@@ -158,6 +158,7 @@ print("Renovate configuration validated successfully.")
   grep -q "https://github.com/gitleaks/gitleaks" "${DEST}/.pre-commit-config.yaml"
   grep -q "rev: v8.24.0" "${DEST}/.pre-commit-config.yaml"
   grep -q "secrets-scan:" "${DEST}/.github/workflows/ci.yml"
+  grep -q 'GITLEAKS_VERSION="8.24.0"' "${DEST}/.github/workflows/ci.yml"
   grep -q "gitleaks detect --verbose" "${DEST}/.github/workflows/ci.yml"
   grep -q "model: ~anthropic/claude-sonnet-latest" "${DEST}/.github/workflows/momus.yml"
   grep -q "base_url: https://openrouter.ai/api/v1" "${DEST}/.github/workflows/momus.yml"
