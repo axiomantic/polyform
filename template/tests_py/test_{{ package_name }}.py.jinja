@@ -34,6 +34,7 @@ def test_phyne_bridge_loader_contract(monkeypatch: pytest.MonkeyPatch) -> None:
     import importlib
     import sys
     import types
+
     import {{ package_name }} as pkg
 
     assert pkg.BRIDGE_STRATEGY == "phyne"
