@@ -133,13 +133,17 @@ jobs:
 {%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
           nimble install --depsOnly -y
 {%- endif %}
-          uv pip install --system -e ".[dev]"
+{%- if python_freethreaded_ci | default(true) %}
+          uv pip install --system --python {% raw %}${{ matrix.python-version }}{% endraw %} -e ".[dev]"
+{%- else %}
+          uv pip install --system --python "3.12" -e ".[dev]"
+{%- endif %}
 
       - name: ruff check
-        run: uv run ruff check .
+        run: python -m ruff check .
 
       - name: pytest
-        run: uv run pytest tests_py/
+        run: python -m pytest tests_py/
 {%- endif %}
 {%- if has_typescript %}
 

@@ -28,18 +28,29 @@ proc {{ package_name }}_add*(a, b: int32): int32 {.importc: "{{ package_name }}_
 {%- if has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
 
 # -----------------------------------------------------------------------------
-# C-ABI Exports for Python phyne / ctypes / native extension
+# C-ABI Exports for Python ({{ python_bridge_strategy | default('ctypes_cabi') }} bridge)
 # -----------------------------------------------------------------------------
 import std/atomics
 
-var gNimMainInitialized: Atomic[bool]
+const pythonBridgeStrategy* = "{{ python_bridge_strategy | default('ctypes_cabi') }}"
+
+# 0 = uninitialized, 1 = initializing, 2 = initialized
+var gNimMainState: Atomic[int]
 
 proc NimMain*() {.cdecl, importc.}
 
 proc nim_init*() {.cdecl, exportc, dynlib.} =
-  ## Thread-safe idempotent runtime initialization for C-ABI / phyne / ctypes loading.
-  if not gNimMainInitialized.exchange(true, moAcquireRelease):
+  ## Thread-safe idempotent runtime initialization with spin-wait barrier for
+  ## free-threaded Python (PEP 703 nogil) and C-ABI / phyne loading.
+  if gNimMainState.load(moAcquire) == 2:
+    return
+  var expected = 0
+  if gNimMainState.compareExchange(expected, 1, moAcquireRelease, moAcquire):
     NimMain()
+    gNimMainState.store(2, moRelease)
+  else:
+    while gNimMainState.load(moAcquire) != 2:
+      cpuRelax()
 
 proc nim_hello*(): cstring {.cdecl, exportc, dynlib.} =
   ## Exported greeting proc returning static cstring buffer.
@@ -52,4 +63,10 @@ proc nim_add*(a, b: int): int {.cdecl, exportc, dynlib.} =
 proc nim_version*(): cstring {.cdecl, exportc, dynlib.} =
   ## Exported version string.
   projectVersion.cstring
+{%- if (python_bridge_strategy | default('none')) == 'phyne' %}
+
+proc nim_bridge_strategy*(): cstring {.cdecl, exportc, dynlib.} =
+  ## Exported bridge strategy identifier for phyne runtime introspection.
+  pythonBridgeStrategy.cstring
+{%- endif %}
 {%- endif %}

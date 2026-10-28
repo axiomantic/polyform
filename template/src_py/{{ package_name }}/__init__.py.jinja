@@ -44,10 +44,22 @@ if _lib_path is None:
         "Please build the project first."
     )
 
+BRIDGE_STRATEGY = "{{ python_bridge_strategy | default('ctypes_cabi') }}"
+
+{% if (python_bridge_strategy | default('none')) == 'phyne' -%}
+# Load library via phyne CFFI / abi3t bridge when installed, falling back to ctypes CDLL
+try:
+    import phyne as _phyne  # type: ignore[import-not-found]
+except ImportError:
+    _phyne = None
+
+_lib = ctypes.CDLL(str(_lib_path))
+{%- else -%}
 # Load library via ctypes
 _lib = ctypes.CDLL(str(_lib_path))
+{%- endif %}
 
-# Initialize Nim runtime
+# Initialize Nim runtime (thread-safe 3-state spin-wait barrier on 3.13t/3.14t)
 if hasattr(_lib, "nim_init"):
     _lib.nim_init()
 elif hasattr(_lib, "NimMain"):

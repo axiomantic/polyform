@@ -223,9 +223,11 @@ print("Renovate configuration validated successfully.")
     test -d "${DEST}/tests_py"
     grep -q '"3.13t"' "${DEST}/.github/workflows/ci.yml"
     grep -q '"3.14t"' "${DEST}/.github/workflows/ci.yml"
+    grep -q 'python -m pytest tests_py/' "${DEST}/.github/workflows/ci.yml"
     if [[ "${HAS_NIM}" == "true" ]]; then
       grep -q "CIBW_ENABLE: cpython-freethreaded" "${DEST}/.github/workflows/cibuildwheel.yml"
-      grep -q "gNimMainInitialized" "${DEST}/src/${PKG_SLUG}.nim"
+      grep -q "gNimMainState" "${DEST}/src/${PKG_SLUG}.nim"
+      grep -q 'BRIDGE_STRATEGY = "ctypes_cabi"' "${DEST}/src_py/${PKG_SLUG}/__init__.py"
     fi
   fi
 
@@ -308,10 +310,28 @@ print("Renovate configuration validated successfully.")
       exit 1
     fi
     grep -q "bridge: \`phyne\`" "${FT_NEG_DEST}/NEXT_STEPS.md"
+    grep -q 'BRIDGE_STRATEGY = "phyne"' "${FT_NEG_DEST}/src_py/ft_nimony_neg_test/__init__.py"
+    grep -q "nim_bridge_strategy" "${FT_NEG_DEST}/src/ft_nimony_neg_test.nim"
     test -f "${FT_NEG_DEST}/CMakeLists.txt"
+    python3 -c '
+import glob, yaml
+for wf in glob.glob("'"${FT_NEG_DEST}"'/.github/workflows/*.yml"):
+    with open(wf, "r") as f:
+        data = yaml.safe_load(f)
+    assert isinstance(data, dict) and "jobs" in data, f"Invalid workflow YAML: {wf}"
+'
     rm -rf "${FT_NEG_DEST}"
     echo ">>> [VERIFY] Negative control passed: nimony_ci=false, python_freethreaded_ci=false, and phyne bridge verified."
   fi
+
+  echo ">>> [VERIFY] Validating rendered GitHub Actions workflow YAML syntax for ${FIXTURE}..."
+  python3 -c '
+import glob, yaml
+for wf in glob.glob("'"${DEST}"'/.github/workflows/*.yml"):
+    with open(wf, "r") as f:
+        data = yaml.safe_load(f)
+    assert isinstance(data, dict) and "jobs" in data, f"Invalid workflow YAML: {wf}"
+'
 
   echo ">>> [SETUP] Installing required toolchain dependencies for ${FIXTURE}..."
   if [[ "${HAS_TYPESCRIPT}" == "true" ]]; then
@@ -342,6 +362,7 @@ print("Renovate configuration validated successfully.")
     echo ">>> [TEST] Running test suites for ${FIXTURE}..."
     if [[ "${HAS_NIM}" == "true" ]]; then
       (cd "${DEST}" && nimble test)
+      (cd "${DEST}" && just check-nimony)
     fi
     if [[ "${HAS_TYPESCRIPT}" == "true" && "${TS_BRIDGE}" == "wasm" ]]; then
       echo ">>> [BUILD] Compiling WASM module..."
