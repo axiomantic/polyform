@@ -39,6 +39,7 @@ jobs:
         with:
           nim-version: {% raw %}${{ matrix.nim-version }}{% endraw %}
           parent-nim-install-directory: {% raw %}${{ runner.temp }}{% endraw %}
+          repo-token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
 {%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
 
       - uses: actions/setup-python@v5
