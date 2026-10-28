@@ -313,7 +313,7 @@ print("Renovate configuration validated successfully.")
     grep -q 'BRIDGE_STRATEGY = "phyne"' "${FT_NEG_DEST}/src_py/ft_nimony_neg_test/__init__.py"
     grep -q "nim_bridge_strategy" "${FT_NEG_DEST}/src/ft_nimony_neg_test.nim"
     test -f "${FT_NEG_DEST}/CMakeLists.txt"
-    python3 -c '
+    uv run --with pyyaml python3 -c '
 import glob, yaml
 for wf in glob.glob("'"${FT_NEG_DEST}"'/.github/workflows/*.yml"):
     with open(wf, "r") as f:
@@ -325,7 +325,7 @@ for wf in glob.glob("'"${FT_NEG_DEST}"'/.github/workflows/*.yml"):
   fi
 
   echo ">>> [VERIFY] Validating rendered GitHub Actions workflow YAML syntax for ${FIXTURE}..."
-  python3 -c '
+  uv run --with pyyaml python3 -c '
 import glob, yaml
 for wf in glob.glob("'"${DEST}"'/.github/workflows/*.yml"):
     with open(wf, "r") as f:
