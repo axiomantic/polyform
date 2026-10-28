@@ -65,7 +65,7 @@ def test_phyne_bridge_loader_contract(monkeypatch: pytest.MonkeyPatch) -> None:
     importlib.reload(pkg)
     assert recorded["path"] == str(pkg._lib_path)
     assert "void nim_init(void);" in recorded["cdef"]
-    assert "int32_t {{ package_name }}_add(int32_t a, int32_t b);" in recorded["cdef"]
+    assert "long long nim_add(long long a, long long b);" in recorded["cdef"]
     assert recorded["init"] == "called"
     assert pkg.add(7, 8) == 15
 

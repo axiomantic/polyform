@@ -58,7 +58,6 @@ if _phyne is not None and hasattr(_phyne, "load_cffi_library"):
         str(_lib_path),
         cdef=(
             "void nim_init(void); "
-            "int32_t {{ package_name }}_add(int32_t a, int32_t b); "
             "const char* nim_hello(void); "
             "long long nim_add(long long a, long long b); "
             "const char* nim_version(void);"
