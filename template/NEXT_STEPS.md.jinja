@@ -102,12 +102,15 @@ To publish the TypeScript / WASM package to npm:
 - **Vitest Suite**: `tests/test_ts_bridge.ts` (run via `npm test` or `just test`)
 - **WASM Build Script**: `scripts/compile_wasm.sh`
 {%- endif %}
-{%- if has_python and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
-### Python Native Extension (ctypes / C-ABI)
+{%- if has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+### Python Native Extension (`{{ python_bridge_strategy }}` / C-ABI / `abi3t` Free-Threaded)
 - **Native Extension Source**: `src/{{ package_name }}.nim`
 - **CMake & Wheel Configuration**: `CMakeLists.txt`, `pyproject.toml`
-- **Python Ctypes Wrapper**: `src_py/{{ package_name }}/`
+- **Python Extension Wrapper**: `src_py/{{ package_name }}/`
 - **Pytest Suite**: `tests_py/` (run via `pytest tests_py/` or `just test`)
+{%- if python_freethreaded_ci | default(true) %}
+- **Free-Threaded Python (PEP 703 `3.13t` / `3.14t`)**: Verified automatically in `.github/workflows/ci.yml` and `.github/workflows/cibuildwheel.yml` (`CIBW_ENABLE: cpython-freethreaded`).
+{%- endif %}
 {%- endif %}
 {%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
 ### HeaderKit C/C++ Foreign Interop

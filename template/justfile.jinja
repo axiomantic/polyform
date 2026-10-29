@@ -69,6 +69,16 @@ lint:
 lint-nim:
     nph --check .
     nimble check
+{%- if nimony_ci | default(true) %}
+
+# Nimony (Nim 3.0 preview) strict compatibility check
+check-nimony:
+    @if command -v nimony >/dev/null 2>&1; then \
+        nimony check src/{{ package_name }}.nim; \
+    else \
+        nim check --experimental:strictFuncs --experimental:strictDefs src/{{ package_name }}.nim; \
+    fi
+{%- endif %}
 {%- endif %}
 {%- if has_python %}
 
@@ -98,7 +108,7 @@ build:
 {%- if has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm' %}
     @just compile-wasm
     npm run build
-{%- elif has_nim and has_python and (python_bridge_strategy | default('none')) == 'ctypes_cabi' %}
+{%- elif has_nim and has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
     @just build-wheel
 {%- elif has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
     @just gen-bindings

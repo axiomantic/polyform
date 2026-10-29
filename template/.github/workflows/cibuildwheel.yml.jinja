@@ -29,15 +29,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.22.0
+        run: python -m pip install cibuildwheel==2.23.3
 
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ARCHS: auto
+{%- endraw %}{%- if python_freethreaded_ci | default(true) %}
+          CIBW_ENABLE: cpython-freethreaded
+{%- endif %}{% raw %}
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest {project}/tests_py
 

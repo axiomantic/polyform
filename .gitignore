@@ -13,3 +13,6 @@ site/
 .vscode/
 *.swp
 justfile.local
+.envrc
+.vine.json
+vine.toml
