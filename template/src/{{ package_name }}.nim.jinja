@@ -25,7 +25,7 @@ proc add*(a, b: int): int =
 proc {{ package_name }}_add*(a, b: int32): int32 {.importc: "{{ package_name }}_add", cdecl.}
   ## Computes sum via foreign C entrypoint.
 {%- endif %}
-{%- if has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+{%- if has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
 
 # -----------------------------------------------------------------------------
 # C-ABI Exports for Python ({{ python_bridge_strategy | default('ctypes_cabi') }} bridge)
@@ -41,7 +41,7 @@ proc NimMain*() {.cdecl, importc.}
 
 proc nim_init*() {.cdecl, exportc, dynlib.} =
   ## Thread-safe idempotent runtime initialization with spin-wait barrier for
-  ## free-threaded Python (PEP 703 nogil) and C-ABI / phyne loading.
+  ## free-threaded Python (PEP 703 nogil) and C-ABI / naganim loading.
   if gNimMainState.load(moAcquire) == 2:
     return
   var expected = 0
@@ -63,10 +63,10 @@ proc nim_add*(a, b: int): int {.cdecl, exportc, dynlib.} =
 proc nim_version*(): cstring {.cdecl, exportc, dynlib.} =
   ## Exported version string.
   projectVersion.cstring
-{%- if (python_bridge_strategy | default('none')) == 'phyne' %}
+{%- if (python_bridge_strategy | default('none')) == 'naganim' %}
 
 proc nim_bridge_strategy*(): cstring {.cdecl, exportc, dynlib.} =
-  ## Exported bridge strategy identifier for phyne runtime introspection.
+  ## Exported bridge strategy identifier for naganim runtime introspection.
   pythonBridgeStrategy.cstring
 {%- endif %}
 {%- endif %}

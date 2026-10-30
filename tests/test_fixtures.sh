@@ -87,7 +87,7 @@ for FIXTURE in "${FIXTURES[@]}"; do
     fixture-nim-py)
       HAS_NIM=true
       HAS_PYTHON=true
-      PYTHON_BRIDGE="phyne"
+      PYTHON_BRIDGE="naganim"
       ;;
     fixture-nim-c)
       HAS_NIM=true
@@ -228,7 +228,7 @@ print("Renovate configuration validated successfully.")
       grep -q "CIBW_ENABLE: cpython-freethreaded" "${DEST}/.github/workflows/cibuildwheel.yml"
       grep -q "gNimMainState" "${DEST}/src/${PKG_SLUG}.nim"
       grep -q "nim_bridge_strategy" "${DEST}/src/${PKG_SLUG}.nim"
-      grep -q 'BRIDGE_STRATEGY = "phyne"' "${DEST}/src_py/${PKG_SLUG}/__init__.py"
+      grep -q 'BRIDGE_STRATEGY = "naganim"' "${DEST}/src_py/${PKG_SLUG}/__init__.py"
       grep -q "load_cffi_library" "${DEST}/src_py/${PKG_SLUG}/__init__.py"
     fi
   fi
@@ -314,7 +314,7 @@ print("Renovate configuration validated successfully.")
     grep -q "bridge: \`ctypes_cabi\`" "${FT_NEG_DEST}/NEXT_STEPS.md"
     grep -q 'BRIDGE_STRATEGY = "ctypes_cabi"' "${FT_NEG_DEST}/src_py/ft_nimony_neg_test/__init__.py"
     if grep -q "nim_bridge_strategy" "${FT_NEG_DEST}/src/ft_nimony_neg_test.nim"; then
-      echo "ERROR: ctypes_cabi rendered phyne-only nim_bridge_strategy in ft_nimony_neg_test.nim" >&2
+      echo "ERROR: ctypes_cabi rendered naganim-only nim_bridge_strategy in ft_nimony_neg_test.nim" >&2
       exit 1
     fi
     test -f "${FT_NEG_DEST}/CMakeLists.txt"

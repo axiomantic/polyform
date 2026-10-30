@@ -102,7 +102,7 @@ To publish the TypeScript / WASM package to npm:
 - **Vitest Suite**: `tests/test_ts_bridge.ts` (run via `npm test` or `just test`)
 - **WASM Build Script**: `scripts/compile_wasm.sh`
 {%- endif %}
-{%- if has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+{%- if has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
 ### Python Native Extension (`{{ python_bridge_strategy }}` / C-ABI / `abi3t` Free-Threaded)
 - **Native Extension Source**: `src/{{ package_name }}.nim`
 - **CMake & Wheel Configuration**: `CMakeLists.txt`, `pyproject.toml`

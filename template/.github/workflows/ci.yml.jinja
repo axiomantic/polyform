@@ -106,7 +106,7 @@ jobs:
 {%- endif %}
     steps:
       - uses: actions/checkout@v4
-{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
 
       - uses: jiro4989/setup-nim-action@v2
         with:
@@ -130,7 +130,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
           nimble install --depsOnly -y
 {%- endif %}
 {%- if python_freethreaded_ci | default(true) %}
