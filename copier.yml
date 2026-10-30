@@ -87,11 +87,11 @@ python_bridge_strategy:
   type: str
   help: "Python bridge integration strategy"
   choices:
-    "phyne (Bidirectional CPython abi3/abi3t + CFFI + lock-free asyncio)": "phyne"
+    "naganim (Bidirectional CPython abi3/abi3t + CFFI + lock-free asyncio)": "naganim"
     "C-ABI / ctypes (scikit-build-core shared library wrapper)": "ctypes_cabi"
     "None (Independent parallel Python package)": "none"
   when: "{{ has_nim and has_python }}"
-  default: "{{ 'ctypes_cabi' if flavor == 'nim_python_wheel' else 'phyne' }}"
+  default: "{{ 'ctypes_cabi' if flavor == 'nim_python_wheel' else 'naganim' }}"
 
 python_freethreaded_ci:
   type: bool
@@ -198,7 +198,7 @@ _exclude:
 
   # 4. Foreign C/C++ exclusions
   - "{% if not has_c_cpp %}include{% endif %}"
-  - "{% if not (has_c_cpp or (has_nim and has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'])) %}CMakeLists.txt{% endif %}"
+  - "{% if not (has_c_cpp or (has_nim and has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'])) %}CMakeLists.txt{% endif %}"
 
   # 5. Overlap Bridge exclusions
   - "{% if not (has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm') %}scripts/compile_wasm.sh{% endif %}"

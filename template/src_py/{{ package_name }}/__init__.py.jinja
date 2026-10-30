@@ -1,5 +1,5 @@
 from __future__ import annotations
-{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
 
 import ctypes
 import importlib.util
@@ -46,15 +46,15 @@ if _lib_path is None:
 
 BRIDGE_STRATEGY = "{{ python_bridge_strategy | default('ctypes_cabi') }}"
 
-{% if (python_bridge_strategy | default('none')) == 'phyne' -%}
-# Load library via phyne CFFI / abi3t bridge when installed, falling back to ctypes CDLL
+{% if (python_bridge_strategy | default('none')) == 'naganim' -%}
+# Load library via naganim CFFI / abi3t bridge when installed, falling back to ctypes CDLL
 try:
-    import phyne as _phyne  # type: ignore[import-not-found]
+    import naganim as _naganim  # type: ignore[import-not-found]
 except ImportError:
-    _phyne = None
+    _naganim = None
 
-if _phyne is not None and hasattr(_phyne, "load_cffi_library"):
-    _lib = _phyne.load_cffi_library(
+if _naganim is not None and hasattr(_naganim, "load_cffi_library"):
+    _lib = _naganim.load_cffi_library(
         str(_lib_path),
         cdef=(
             "void nim_init(void); "

@@ -1,4 +1,4 @@
-{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
 [build-system]
 requires = ["scikit-build-core>=0.9.0"]
 build-backend = "scikit_build_core.build"
@@ -30,7 +30,7 @@ classifiers = [
 dev = [
     "pytest>=7.0.0",
     "ruff>=0.3.0",
-{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
     "scikit-build-core>=0.9.0",
     "cmake>=3.18",
 {%- endif %}
@@ -39,7 +39,7 @@ test = [
     "pytest>=7.0.0",
 ]
 
-{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'phyne'] %}
+{%- if has_nim and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
 [tool.scikit-build]
 wheel.packages = ["src_py/{{ package_name }}"]
 build.verbose = true

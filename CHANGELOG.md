@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`naganim` Python Bridge Strategy (`elijahr/naganim`):** Standardized the default `python_bridge_strategy` option, template bridge loader (`template/src_py/{{ package_name }}/__init__.py.jinja`), Nim bridge strategy constant (`template/src/{{ package_name }}.nim.jinja`), and test fixtures (`template/tests_py/test_{{ package_name }}.py.jinja`, `tests/test_fixtures.sh`) on `naganim` (`elijahr/naganim`).
+
 ### Added
 - **Free-Threaded Python (`3.13t`, `3.14t` / PEP 703 `nogil`) CI & Wheel Matrix:** Added `python_freethreaded_ci` option in `copier.yml` (default `true`) expanding `template/.github/workflows/ci.yml.jinja` `test-python` matrix to `["3.12", "3.13t", "3.14t"]` and enabling `CIBW_ENABLE: cpython-freethreaded` in `template/.github/workflows/cibuildwheel.yml.jinja` (upgraded to `cibuildwheel==2.23.3`).
 - **Nimony (Nim 3.0 Preview) Compatibility CI & Justfile Recipe:** Added `nimony_ci` option in `copier.yml` (default `true`) adding a Nimony 3.0 / strict definitions check step in `template/.github/workflows/ci.yml.jinja` and a `check-nimony` recipe in `template/justfile.jinja`.
-- **`phyne` Python Bridge Strategy & 3-State Thread-Safe `NimMain()` Barrier:** Added `phyne` as the default `python_bridge_strategy` in `copier.yml` and guarded `nim_init()` in `template/src/{{ package_name }}.nim.jinja` with a 3-state atomic spin-wait barrier (`gNimMainState`) so concurrent free-threaded Python callers wait until `NimMain()` finishes before invoking exported Nim procedures.
+- **`naganim` Python Bridge Strategy & 3-State Thread-Safe `NimMain()` Barrier:** Added `naganim` as the default `python_bridge_strategy` in `copier.yml` and guarded `nim_init()` in `template/src/{{ package_name }}.nim.jinja` with a 3-state atomic spin-wait barrier (`gNimMainState`) so concurrent free-threaded Python callers wait until `NimMain()` finishes before invoking exported Nim procedures.
 
 ### Removed
-- **Legacy `nimpy` Bridge Option:** Removed the unimplemented `nimpy` choice from `python_bridge_strategy` in `copier.yml` in favor of `phyne` (bidirectional CPython `abi3`/`abi3t` + CFFI + lock-free asyncio bridge) and `ctypes_cabi`.
+- **Legacy `nimpy` Bridge Option:** Removed the unimplemented `nimpy` choice from `python_bridge_strategy` in `copier.yml` in favor of `naganim` (bidirectional CPython `abi3`/`abi3t` + CFFI + lock-free asyncio bridge) and `ctypes_cabi`.
 
 ## [0.2.2] - 2026-10-28
 

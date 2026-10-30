@@ -27,17 +27,17 @@ def test_add_type_contract() -> None:
     # Negative control: invalid argument types should raise TypeError or fail conversion
     with pytest.raises((TypeError, ValueError)):
         add("invalid", 10)  # type: ignore[arg-type]
-{%- if has_nim and (python_bridge_strategy | default('none')) == 'phyne' %}
+{%- if has_nim and (python_bridge_strategy | default('none')) == 'naganim' %}
 
 
-def test_phyne_bridge_loader_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_naganim_bridge_loader_contract(monkeypatch: pytest.MonkeyPatch) -> None:
     import importlib
     import sys
     import types
 
     import {{ package_name }} as pkg
 
-    assert pkg.BRIDGE_STRATEGY == "phyne"
+    assert pkg.BRIDGE_STRATEGY == "naganim"
     recorded: dict[str, str] = {}
 
     class _MockLib:
@@ -53,15 +53,15 @@ def test_phyne_bridge_loader_contract(monkeypatch: pytest.MonkeyPatch) -> None:
         def nim_version(self) -> bytes:
             return b"0.0.1"
 
-    mock_phyne = types.ModuleType("phyne")
+    mock_naganim = types.ModuleType("naganim")
 
     def _load_cffi_library(path: str, cdef: str) -> _MockLib:
         recorded["path"] = path
         recorded["cdef"] = cdef
         return _MockLib()
 
-    mock_phyne.load_cffi_library = _load_cffi_library  # type: ignore[attr-defined]
-    monkeypatch.setitem(sys.modules, "phyne", mock_phyne)
+    mock_naganim.load_cffi_library = _load_cffi_library  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "naganim", mock_naganim)
     importlib.reload(pkg)
     assert recorded["path"] == str(pkg._lib_path)
     assert "void nim_init(void);" in recorded["cdef"]
@@ -69,6 +69,6 @@ def test_phyne_bridge_loader_contract(monkeypatch: pytest.MonkeyPatch) -> None:
     assert recorded["init"] == "called"
     assert pkg.add(7, 8) == 15
 
-    monkeypatch.delitem(sys.modules, "phyne", raising=False)
+    monkeypatch.delitem(sys.modules, "naganim", raising=False)
     importlib.reload(pkg)
 {%- endif %}
