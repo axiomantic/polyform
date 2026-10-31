@@ -139,6 +139,33 @@ for FIXTURE in "${FIXTURES[@]}"; do
   test -f "${DEST}/NEXT_STEPS.md"
   test -f "${DEST}/.momus.yaml"
   test -f "${DEST}/.github/renovate.json"
+  test -f "${DEST}/.envrc"
+  grep -q "CACHE_ROOT=" "${DEST}/.envrc"
+  grep -q ".env.local" "${DEST}/.gitignore"
+  grep -q ".envrc.local" "${DEST}/.gitignore"
+
+  # Facet-specific .envrc controls
+  if [[ "${HAS_NIM}" == "true" ]]; then
+    grep -q "NIMCACHE=" "${DEST}/.envrc"
+  else
+    test $(grep -c "NIMCACHE=" "${DEST}/.envrc") -eq 0
+  fi
+  if [[ "${HAS_PYTHON}" == "true" ]]; then
+    grep -q "UV_LINK_MODE=" "${DEST}/.envrc"
+    grep -q "VIRTUAL_ENV=" "${DEST}/.envrc"
+  else
+    test $(grep -c "UV_LINK_MODE=" "${DEST}/.envrc") -eq 0
+  fi
+  if [[ "${HAS_TYPESCRIPT}" == "true" ]]; then
+    grep -q "node_modules/.bin" "${DEST}/.envrc"
+  else
+    test $(grep -c "node_modules/.bin" "${DEST}/.envrc") -eq 0
+  fi
+  if [[ "${HAS_C_CPP}" == "true" || "${HAS_NIM}" == "true" ]]; then
+    grep -q "CCACHE_BASEDIR" "${DEST}/.envrc"
+  else
+    test $(grep -c "CCACHE_BASEDIR" "${DEST}/.envrc") -eq 0
+  fi
   python3 -c '
 import json, re
 with open("'"${DEST}"'/.github/renovate.json", "r") as f:

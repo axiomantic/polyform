@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Composable `.envrc` Development Environment:** Added `template/.envrc.jinja` generating isolated development workspaces with `CACHE_ROOT` caching, `NIMCACHE` directory, `ccache` integration for C/C++ and Nim compilers, `uv clone` virtualenv pathing for Python, and `node_modules/.bin` pathing for TypeScript.
+- **Direnv Automation & Local Overrides:** Added automatic `direnv allow` post-copy task in `copier.yml` and ignored `.env.local` / `.envrc.local` in `template/.gitignore.jinja`.
+
 ## [0.3.1] - 2026-10-31
 
 ### Added
