@@ -1,0 +1,12 @@
+import std/unittest
+import {{ package_name }}/[bindings, dsl]
+
+suite "High-Level DSL Overlay Verification":
+  test "idiomatic compute proc delegates to bindings":
+    let res = compute(15, 25)
+    check res == 40
+
+  test "withOffset template executes correctly":
+    withOffset(10):
+      let total = baseOffset + compute(5, 5)
+      check total == 20

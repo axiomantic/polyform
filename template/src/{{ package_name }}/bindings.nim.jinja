@@ -1,0 +1,7 @@
+# {{ package_name }}/bindings - Low-level foreign C bindings
+# Auto-generated or stubbed for HeaderKit foreign C-ABI interop
+
+{.compile: "../../include/{{ package_name }}.c".}
+
+proc {{ package_name }}_add*(a, b: int32): int32 {.importc: "{{ package_name }}_add", cdecl.}
+  ## Foreign C entrypoint computing sum.

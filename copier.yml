@@ -80,6 +80,11 @@ has_c_cpp:
   help: "Include C/C++ foreign interop toolchain (headers, CMake shims)?"
   default: "{{ flavor == 'headerkit_binding' }}"
 
+has_embedded:
+  type: bool
+  help: "Target embedded freestanding RTOS environment (standalone ARC, Zephyr / West / CMake integration)?"
+  default: "{{ flavor == 'embedded_nim' }}"
+
 # ----------------------------------------------------------------------
 # 3. Interop Bridge Strategies
 # ----------------------------------------------------------------------
@@ -207,6 +212,11 @@ _exclude:
   - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}headerkit.toml{% endif %}"
   - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}scripts/generate_bindings.py{% endif %}"
   - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}tests/test_tripwire.nim{% endif %}"
+  - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}src/{{ package_name }}/bindings.nim{% endif %}"
+  - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}src/{{ package_name }}/dsl.nim{% endif %}"
+  - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}tests/test_dsl.nim{% endif %}"
+  - "{% if not has_embedded %}embedded.cfg{% endif %}"
+  - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}src/{{ package_name }}{% endif %}"
 
   # Combined scripts exclusion if neither WASM nor HeaderKit scripts are needed
   - "{% if not (has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm') and not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}scripts{% endif %}"

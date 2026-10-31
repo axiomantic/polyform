@@ -19,11 +19,12 @@ proc add*(a, b: int): int =
 {%- endif %}
 {%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
 
-# HeaderKit C-ABI foreign bindings
-{.compile: "../include/{{ package_name }}.c".}
+# HeaderKit foreign bindings and high-level DSL re-exports
+import ./{{ package_name }}/bindings
+export bindings
 
-proc {{ package_name }}_add*(a, b: int32): int32 {.importc: "{{ package_name }}_add", cdecl.}
-  ## Computes sum via foreign C entrypoint.
+import ./{{ package_name }}/dsl
+export dsl
 {%- endif %}
 {%- if has_python and (python_bridge_strategy | default('none')) in ['ctypes_cabi', 'naganim'] %}
 

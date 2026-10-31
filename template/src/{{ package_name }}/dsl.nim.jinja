@@ -1,0 +1,14 @@
+# {{ package_name }}/dsl - High-level idiomatic Nim DSL overlay
+# Hand-written DSL abstractions preserved across binding regenerations.
+
+import ./bindings
+
+template withOffset*(offset: int32, body: untyped): untyped =
+  ## Example high-level DSL template demonstrating clean separation
+  ## between hand-written abstractions and regenerated bindings.
+  let baseOffset {.inject.} = offset
+  body
+
+proc compute*(a, b: int32): int32 =
+  ## Idiomatic Nim wrapper over low-level {{ package_name }}_add.
+  {{ package_name }}_add(a, b)

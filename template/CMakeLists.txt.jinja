@@ -1,4 +1,33 @@
 cmake_minimum_required(VERSION 3.18)
+{% if has_embedded -%}
+project({{ package_name }} LANGUAGES C)
+
+# Standalone Embedded / Zephyr / RTOS integration
+find_program(NIM_EXECUTABLE NAMES nim REQUIRED)
+
+set(NIM_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/{{ package_name }}.nim")
+set(NIM_C_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/nimcache")
+
+# Freestanding C code generation without OS threads/exceptions
+add_custom_command(
+  OUTPUT "${NIM_C_OUT_DIR}/@m{{ package_name }}.nim.c"
+  COMMAND ${NIM_EXECUTABLE} c --compileOnly --nimcache:${NIM_C_OUT_DIR}
+          --config:${CMAKE_CURRENT_SOURCE_DIR}/embedded.cfg
+          "${NIM_SRC}"
+  DEPENDS "${NIM_SRC}" "${CMAKE_CURRENT_SOURCE_DIR}/embedded.cfg"
+  COMMENT "Generating freestanding C sources from Nim for embedded target"
+  VERBATIM
+)
+
+# Glob generated C files and expose as static / interface library for CMake/West
+file(GLOB NIM_GENERATED_C "${NIM_C_OUT_DIR}/*.c")
+
+add_library({{ package_name }} STATIC ${NIM_GENERATED_C} "${CMAKE_CURRENT_SOURCE_DIR}/include/{{ package_name }}.c")
+target_include_directories({{ package_name }} PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  "${NIM_C_OUT_DIR}"
+)
+{% else -%}
 project({{ package_name }}_ext LANGUAGES C)
 
 find_program(NIM_EXECUTABLE NAMES nim REQUIRED)
@@ -29,3 +58,4 @@ add_custom_command(
 add_custom_target({{ package_name }}_ext ALL DEPENDS "${NIM_LIB_PATH}")
 
 install(FILES "${NIM_LIB_PATH}" DESTINATION "{{ package_name }}")
+{% endif -%}

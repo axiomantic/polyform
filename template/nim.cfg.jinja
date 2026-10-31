@@ -1,0 +1,17 @@
+# nim.cfg - Project build options
+{% if has_embedded -%}
+# Standalone Embedded / Freestanding ARC profile (for target source compilation)
+--mm:arc
+--exceptions:goto
+--threads:off
+-d:useMalloc
+{% else -%}
+# Memory management & concurrency standard
+--mm:orc
+--threads:on
+{% endif %}
+# Code style hint
+--styleCheck:hint
+
+# Utilize all available CPU cores for the C compiler backend
+--parallelBuild:0

@@ -8,7 +8,9 @@ import sys
 def main() -> int:
     repo_root = Path(__file__).parent.parent
     header_path = repo_root / "include" / "{{ package_name }}.h"
-    out_path = repo_root / "src" / "{{ package_name }}.nim"
+    bindings_dir = repo_root / "src" / "{{ package_name }}"
+    bindings_dir.mkdir(parents=True, exist_ok=True)
+    out_path = bindings_dir / "bindings.nim"
 
     print(f"Generating Nim bindings for {header_path} -> {out_path}...")
     cmd = [

@@ -34,6 +34,7 @@ if [[ "${TARGET_FIXTURE}" == "all" ]]; then
     "fixture-nim-ts"
     "fixture-nim-py"
     "fixture-nim-c"
+    "fixture-embedded-nim"
   )
 else
   FIXTURES=("${TARGET_FIXTURE}")
@@ -63,6 +64,7 @@ for FIXTURE in "${FIXTURES[@]}"; do
   HAS_PYTHON=false
   HAS_TYPESCRIPT=false
   HAS_C_CPP=false
+  HAS_EMBEDDED=false
   DOCS_ENGINE="none"
   TS_BRIDGE="none"
   PYTHON_BRIDGE="none"
@@ -94,6 +96,12 @@ for FIXTURE in "${FIXTURES[@]}"; do
       HAS_C_CPP=true
       C_BINDING="headerkit"
       ;;
+    fixture-embedded-nim)
+      HAS_NIM=true
+      HAS_C_CPP=true
+      C_BINDING="headerkit"
+      HAS_EMBEDDED=true
+      ;;
     *)
       echo "ERROR: Unknown fixture profile: ${FIXTURE}" >&2
       exit 1
@@ -109,6 +117,7 @@ for FIXTURE in "${FIXTURES[@]}"; do
     -d has_python="${HAS_PYTHON}"
     -d has_typescript="${HAS_TYPESCRIPT}"
     -d has_c_cpp="${HAS_C_CPP}"
+    -d has_embedded="${HAS_EMBEDDED}"
     -d docs_engine="${DOCS_ENGINE}"
   )
 
@@ -254,7 +263,26 @@ print("Renovate configuration validated successfully.")
       test -f "${DEST}/headerkit.toml"
       test -f "${DEST}/scripts/generate_bindings.py"
       test -f "${DEST}/tests/test_tripwire.nim"
+      test -f "${DEST}/src/${PKG_SLUG}/bindings.nim"
+      test -f "${DEST}/src/${PKG_SLUG}/dsl.nim"
+      test -f "${DEST}/tests/test_dsl.nim"
+      grep -q "out_path = bindings_dir / \"bindings.nim\"" "${DEST}/scripts/generate_bindings.py"
+      grep -q "export bindings" "${DEST}/src/${PKG_SLUG}.nim"
+      grep -q "export dsl" "${DEST}/src/${PKG_SLUG}.nim"
     fi
+  fi
+
+  # Embedded negative and positive controls
+  if [[ "${HAS_EMBEDDED}" == "true" ]]; then
+    grep -q "target = \"embedded\"" "${DEST}/headerkit.toml"
+    test -f "${DEST}/embedded.cfg"
+    grep -q -- "--os:standalone" "${DEST}/embedded.cfg"
+    grep -q -- "--mm:arc" "${DEST}/embedded.cfg"
+    test -f "${DEST}/CMakeLists.txt"
+    grep -q "STATIC" "${DEST}/CMakeLists.txt"
+  elif [[ "${HAS_NIM}" == "true" ]]; then
+    test ! -f "${DEST}/embedded.cfg"
+    grep -q -- "--mm:orc" "${DEST}/nim.cfg"
   fi
 
   # Negative control for Momus review exclusion

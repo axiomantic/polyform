@@ -1,5 +1,8 @@
 import std/unittest
 import {{ package_name }}
+{% if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' -%}
+import {{ package_name }}/bindings
+{% endif %}
 
 suite "Tripwire Symbol & ABI Verification":
   test "verify foreign C function resolves and computes":

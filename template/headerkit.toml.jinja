@@ -4,6 +4,9 @@
 target_language = "nim"
 package_name = "{{ package_name }}"
 layout = "package"
+{% if has_embedded -%}
+target = "embedded"
+{% endif %}
 
 [compiler]
 include_dirs = ["include"]
