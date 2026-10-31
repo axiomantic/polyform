@@ -1,0 +1,7 @@
+import std/os
+
+switch("path", thisDir() / "../src")
+{% if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' -%}
+switch("cincludes", thisDir() / "../include")
+switch("compile", thisDir() / "../include/{{ package_name }}.c")
+{% endif %}

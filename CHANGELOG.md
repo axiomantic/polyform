@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Bindings Destination Path & Overwrite Protection:** Updated `template/scripts/generate_bindings.py.jinja` to generate foreign FFI bindings into `src/{{ package_name }}/bindings.nim` rather than clobbering the root module `src/{{ package_name }}.nim`, and re-exported `bindings` and `dsl` from `src/{{ package_name }}.nim.jinja`.
+- **C Source & Include Compilation in Test Suite:** Configured `template/tests/config.nims.jinja` with `cincludes` and `compile` switches for C/C++ HeaderKit bindings to ensure standalone tests link foreign symbols cleanly without duplicate compile pragmas.
 
 ## [0.3.0] - 2026-10-31
 
