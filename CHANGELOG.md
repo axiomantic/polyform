@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Default Dotfile & Swarm Artifact Ignore Posture:** Configured `template/.gitignore.jinja` to ignore all dotfiles and dotdirectories (`.*`) by default with explicit opt-ins (`!.gitignore`, `!.editorconfig`, `!.envrc`, `!.pre-commit-config.yaml`, `!.copier-answers.yml`, `!.github/`, `!.momus.yaml`). Automatically ignores swarm ceremony artifacts (`garden.toml`, `garden-swarm.json`, `garden-prompts.md`, `implementation_plan.md`, `understanding.md`, `audit_report.md`, `adversarial_code_review_plan.md`) across downstream repositories.
 - **Composable `.envrc` Development Environment:** Added `template/.envrc.jinja` generating isolated development workspaces with `CACHE_ROOT` caching, `NIMCACHE` directory, `ccache` integration for C/C++ and Nim compilers, `uv clone` virtualenv pathing for Python, and `node_modules/.bin` pathing for TypeScript.
 - **Direnv Automation & Local Overrides:** Added automatic `direnv allow` post-copy task in `copier.yml` and ignored `.env.local` / `.envrc.local` in `template/.gitignore.jinja`.
 

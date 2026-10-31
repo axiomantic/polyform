@@ -1,7 +1,27 @@
-# Local environment overrides
-.env.local
-.envrc.local
+# Default: ignore all dotfiles and dotdirectories
+.*
 
+# Explicit dotfile opt-ins (tracked template standards)
+!.gitignore
+!.editorconfig
+!.envrc
+!.pre-commit-config.yaml
+!.copier-answers.yml
+!.github/
+{% if enable_momus_review -%}
+!.momus.yaml
+{%- endif %}
+
+# Swarm ceremony and transient files
+garden.toml
+garden-swarm.json
+garden-prompts.md
+implementation_plan.md
+understanding.md
+audit_report.md
+adversarial_code_review_plan.md
+
+# Build caches & binaries
 nimcache/
 *.exe
 *.out
@@ -12,9 +32,6 @@ nimblecache/
 .nimble/
 htmldocs/
 site/
-.DS_Store
-.idea/
-.vscode/
 *.swp
 justfile.local
 
@@ -42,8 +59,6 @@ __pycache__/
 *.pyc
 build/
 *.egg-info/
-.pytest_cache/
-.venv/
 {% endif %}
 {% if has_c_cpp %}
 # Foreign C/C++ artifacts

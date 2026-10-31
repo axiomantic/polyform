@@ -141,8 +141,10 @@ for FIXTURE in "${FIXTURES[@]}"; do
   test -f "${DEST}/.github/renovate.json"
   test -f "${DEST}/.envrc"
   grep -q "CACHE_ROOT=" "${DEST}/.envrc"
-  grep -q ".env.local" "${DEST}/.gitignore"
-  grep -q ".envrc.local" "${DEST}/.gitignore"
+  grep -q "^\.\*$" "${DEST}/.gitignore"
+  grep -q "^!\.gitignore$" "${DEST}/.gitignore"
+  grep -q "^!\.envrc$" "${DEST}/.gitignore"
+  grep -q "garden\.toml" "${DEST}/.gitignore"
 
   # Facet-specific .envrc controls
   if [[ "${HAS_NIM}" == "true" ]]; then
