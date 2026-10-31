@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Embedded Freestanding RTOS Profile (`has_embedded`):** Added `has_embedded` boolean facet in `copier.yml` configuring standalone ARC compiler profiles (`template/embedded.cfg.jinja` with `--os:standalone --mm:arc --exceptions:goto --threads:off -d:useMalloc --header`), automated CMake freestanding C translation and static library targets (`CMakeLists.txt.jinja`), and `headerkit.toml` embedded target orientation.
+- **High-Level DSL Overlay Scaffolding:** Scaffolded `template/src/{{ package_name }}/dsl.nim.jinja` and `template/tests/test_dsl.nim.jinja` providing idiomatic Nim abstractions cleanly decoupled from foreign C FFI stubs.
+
+### Fixed
+- **Bindings Destination Path & Overwrite Protection:** Updated `template/scripts/generate_bindings.py.jinja` to generate foreign FFI bindings into `src/{{ package_name }}/bindings.nim` rather than clobbering the root module `src/{{ package_name }}.nim`, and re-exported `bindings` and `dsl` from `src/{{ package_name }}.nim.jinja`.
+
 ## [0.3.0] - 2026-10-31
 
 ### Changed
