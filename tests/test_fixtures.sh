@@ -303,7 +303,7 @@ print("Renovate configuration validated successfully.")
 
   # Embedded negative and positive controls
   if [[ "${HAS_EMBEDDED}" == "true" ]]; then
-    grep -q "target = \"embedded\"" "${DEST}/headerkit.toml"
+    grep -q "embedded = true" "${DEST}/headerkit.toml"
     test -f "${DEST}/embedded.cfg"
     grep -q -- "--os:standalone" "${DEST}/embedded.cfg"
     grep -q -- "--mm:arc" "${DEST}/embedded.cfg"

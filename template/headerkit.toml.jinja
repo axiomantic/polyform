@@ -9,6 +9,6 @@ name = "{{ package_name }}_bindings"
 writer = "nim"
 output = "src/{{ package_name }}/bindings.nim"
 {%- if has_embedded %}
-target = "embedded"
+options = { embedded = true }
 {%- endif %}
 
