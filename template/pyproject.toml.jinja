@@ -50,6 +50,9 @@ install.strip = false
 {%- else %}
 [tool.hatch.build.targets.wheel]
 packages = ["src_py/{{ package_name }}"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 {%- endif %}
 
 [tool.pytest.ini_options]
