@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Direnv Automation & Local Overrides:** Added automatic `direnv allow` post-copy task in `copier.yml` and ignored `.env.local` / `.envrc.local` in `template/.gitignore.jinja`.
 
 ### Fixed
+- **HeaderKit Include Prefix Stripping:** Added `strip_include_prefixes = ["include"]` to `options` under `[[targets]]` in `template/headerkit.toml.jinja` to strip redundant directory prefixes from generated C import headers.
+- **Repository Hygiene & Swarm Artifact Untracking:** Removed legacy swarm ceremony files from git tracking (`audit_report.md`, `design.md`, `garden-swarm.json`, `implementation_plan.md`, `understanding.md`) and added them to root `.gitignore`.
 - **HeaderKit Embedded Target Option:** Configured `options = { embedded = true }` under `[[targets]]` in `template/headerkit.toml.jinja` to align with HeaderKit v2 `NimWriter.options` schema without triggering LLVM target triple normalization errors.
 - **Jinja Formatting & Hatchling Wheel Metadata:** Formatted `template/tests/config.nims.jinja` and `template/src/{{ package_name }}/bindings.nim.jinja` with precise Jinja whitespace stripping to satisfy `nph` code formatter checks across all fixture combinations, and enabled `allow-direct-references = true` under `[tool.hatch.metadata]` in `template/pyproject.toml.jinja` to support direct Git references.
 
