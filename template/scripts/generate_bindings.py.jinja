@@ -5,22 +5,21 @@ from pathlib import Path
 import subprocess
 import sys
 
+
 def main() -> int:
     repo_root = Path(__file__).parent.parent
-    header_path = repo_root / "include" / "{{ package_name }}.h"
+    config_path = repo_root / "headerkit.toml"
     bindings_dir = repo_root / "src" / "{{ package_name }}"
     bindings_dir.mkdir(parents=True, exist_ok=True)
     out_path = bindings_dir / "bindings.nim"
 
-    print(f"Generating Nim bindings for {header_path} -> {out_path}...")
+    print(f"Generating Nim bindings via {config_path} -> {out_path}...")
     cmd = [
         "headerkit",
-        str(header_path),
-        "-w", "nim",
-        "-o", f"nim:{out_path}",
+        "generate",
     ]
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, cwd=str(repo_root), check=True)
         print("Bindings successfully generated.")
         return 0
     except FileNotFoundError:
@@ -30,5 +29,7 @@ def main() -> int:
         print(f"Error during binding generation: {e}", file=sys.stderr)
         return e.returncode
 
+
 if __name__ == "__main__":
     sys.exit(main())
+

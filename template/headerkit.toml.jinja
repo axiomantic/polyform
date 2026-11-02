@@ -1,17 +1,14 @@
-# HeaderKit Configuration for {{ package_name }}
+# HeaderKit v2 Declarative Schema for {{ package_name }}
 
-[general]
-target_language = "nim"
-package_name = "{{ package_name }}"
-layout = "package"
-{% if has_embedded -%}
-target = "embedded"
-{% endif %}
-
-[compiler]
+backend = "libclang"
+headers = ["include/{{ package_name }}.h"]
 include_dirs = ["include"]
-defines = []
-flags = ["-Wall"]
 
-[output]
-output_dir = "src"
+[[targets]]
+name = "{{ package_name }}_bindings"
+writer = "nim"
+output = "src/{{ package_name }}/bindings.nim"
+{%- if has_embedded %}
+target = "embedded"
+{%- endif %}
+
