@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Composable `.envrc` Development Environment:** Added `template/.envrc.jinja` generating isolated development workspaces with `CACHE_ROOT` caching, `NIMCACHE` directory, `ccache` integration for C/C++ and Nim compilers, `uv clone` virtualenv pathing for Python, and `node_modules/.bin` pathing for TypeScript.
 - **Direnv Automation & Local Overrides:** Added automatic `direnv allow` post-copy task in `copier.yml` and ignored `.env.local` / `.envrc.local` in `template/.gitignore.jinja`.
 
+### Fixed
+- **Jinja Formatting & Hatchling Wheel Metadata:** Formatted `template/tests/config.nims.jinja` and `template/src/{{ package_name }}/bindings.nim.jinja` with precise Jinja whitespace stripping to satisfy `nph` code formatter checks across all fixture combinations, and enabled `allow-direct-references = true` under `[tool.hatch.metadata]` in `template/pyproject.toml.jinja` to support direct Git references.
+
 ## [0.3.1] - 2026-10-31
 
 ### Added
