@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-03
+
 ### Added
 - **HeaderKit v2 `[[targets]]` Declarative Schema:** Upgraded `template/headerkit.toml.jinja` to the HeaderKit v2 declarative configuration standard (`backend = "libclang"`, `headers`, `include_dirs`, and `[[targets]]` definitions with `name`, `writer = "nim"`, `output = "src/{{ package_name }}/bindings.nim"`, and conditional `options = { embedded = true }`).
 - **HeaderKit v2 PyPI Dependency:** Pinned `headerkit>=0.50.0` in `template/pyproject.toml.jinja` (`[project.optional-dependencies] dev`) and `template/justfile.jinja` setup recipe for declarative C/C++ HeaderKit bindings.
