@@ -16,3 +16,13 @@ justfile.local
 .envrc
 .vine.json
 vine.toml
+
+# Swarm ceremony artifacts
+audit_report.md
+design.md
+garden-swarm.json
+implementation_plan.md
+understanding.md
+garden.toml
+garden-prompts.md
+adversarial_code_review_plan.md

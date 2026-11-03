@@ -8,9 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **HeaderKit v2 `[[targets]]` Declarative Schema:** Upgraded `template/headerkit.toml.jinja` to the HeaderKit v2 declarative configuration standard (`backend = "libclang"`, `headers`, `include_dirs`, and `[[targets]]` definitions with `name`, `writer = "nim"`, `output = "src/{{ package_name }}/bindings.nim"`, and conditional `options = { embedded = true }`).
+- **HeaderKit v2 PyPI Dependency:** Pinned `headerkit>=0.50.0` in `template/pyproject.toml.jinja` (`[project.optional-dependencies] dev`) and `template/justfile.jinja` setup recipe for declarative C/C++ HeaderKit bindings.
+- **HeaderKit v2 Generator Invocation:** Updated `template/scripts/generate_bindings.py.jinja` and `template/justfile.jinja` (`gen-bindings`) to invoke `headerkit generate` directly against declarative `headerkit.toml` configuration with script fallback.
 - **Default Dotfile & Swarm Artifact Ignore Posture:** Configured `template/.gitignore.jinja` to ignore all dotfiles and dotdirectories (`.*`) by default with explicit opt-ins (`!.gitignore`, `!.editorconfig`, `!.envrc`, `!.pre-commit-config.yaml`, `!.copier-answers.yml`, `!.github/`, `!.momus.yaml`). Automatically ignores swarm ceremony artifacts (`garden.toml`, `garden-swarm.json`, `garden-prompts.md`, `implementation_plan.md`, `understanding.md`, `audit_report.md`, `adversarial_code_review_plan.md`) across downstream repositories.
 - **Composable `.envrc` Development Environment:** Added `template/.envrc.jinja` generating isolated development workspaces with `CACHE_ROOT` caching, `NIMCACHE` directory, `ccache` integration for C/C++ and Nim compilers, `uv clone` virtualenv pathing for Python, and `node_modules/.bin` pathing for TypeScript.
 - **Direnv Automation & Local Overrides:** Added automatic `direnv allow` post-copy task in `copier.yml` and ignored `.env.local` / `.envrc.local` in `template/.gitignore.jinja`.
+
+### Fixed
+- **HeaderKit Include Prefix Stripping:** Added `strip_include_prefixes = ["include"]` to `options` under `[[targets]]` in `template/headerkit.toml.jinja` to strip redundant directory prefixes from generated C import headers.
+- **Repository Hygiene & Swarm Artifact Untracking:** Removed legacy swarm ceremony files from git tracking (`audit_report.md`, `design.md`, `garden-swarm.json`, `implementation_plan.md`, `understanding.md`) and added them to root `.gitignore`.
+- **HeaderKit Embedded Target Option:** Configured `options = { embedded = true }` under `[[targets]]` in `template/headerkit.toml.jinja` to align with HeaderKit v2 `NimWriter.options` schema without triggering LLVM target triple normalization errors.
+- **Jinja Formatting & Hatchling Wheel Metadata:** Formatted `template/tests/config.nims.jinja` and `template/src/{{ package_name }}/bindings.nim.jinja` with precise Jinja whitespace stripping to satisfy `nph` code formatter checks across all fixture combinations, and enabled `allow-direct-references = true` under `[tool.hatch.metadata]` in `template/pyproject.toml.jinja` to support direct Git references.
 
 ## [0.3.1] - 2026-10-31
 
