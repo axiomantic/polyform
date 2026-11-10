@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **HeaderKit v0.51.0 PyPI Dependency:** Updated `headerkit` minimum version to `>=0.51.0` in `template/pyproject.toml.jinja` and `template/justfile.jinja`.
 
+### Fixed
+- **Docs Deployment Node 24 & Playwright Chromium:** Upgraded `node-version` to `24` in `.github/workflows/docs.yml` and `template/.github/workflows/docs.yml.jinja` for Astro 7 compatibility, and installed Playwright Chromium dependencies (`cd docs && npx playwright install --with-deps chromium`) to support headless Mermaid diagram rendering.
+
 ## [0.4.0] - 2026-11-03
 
 ### Added
