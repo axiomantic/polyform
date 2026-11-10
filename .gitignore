@@ -8,6 +8,10 @@ nimblecache/
 .nimble/
 htmldocs/
 site/
+docs/node_modules/
+docs/dist/
+docs/.astro/
+docs/package-lock.json
 .DS_Store
 .idea/
 .vscode/

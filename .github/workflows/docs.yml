@@ -1,50 +1,60 @@
 name: Docs
+
 on:
   push:
     branches: [main]
-permissions:
-  contents: write
-  pages: write
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+      - "copier.yml"
+      - "README.md"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with: { python-version: "3.12" }
-      - uses: jiro4989/setup-nim-action@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          nim-version: stable
-          parent-nim-install-directory: ${{ runner.temp }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Make Nim compiler module importable
-        # mkdocstrings-nim's extractor compiles a helper that does
-        # `import compiler/ast` etc. The compiler module ships at
-        # `<nim_install>/compiler/`, but Nim's default search path only
-        # includes `<nim_install>/lib/...`. `nimble install -y compiler`
-        # is a no-op against jiro4989/setup-nim-action's binary install
-        # (the `compiler` package was renamed to `nim` and the alias short-
-        # circuits when a nim binary is already present). Instead, write a
-        # user-level nim.cfg that adds the install root to the search path,
-        # making `compiler/ast` resolvable for every subsequent `nim c`.
-        run: |
-          NIM_ROOT="$(dirname "$(dirname "$(command -v nim)")")"
-          mkdir -p "$HOME/.config/nim"
-          echo "--path:\"$NIM_ROOT\"" >> "$HOME/.config/nim/nim.cfg"
-          echo "Added $NIM_ROOT to nim search path"
-          echo 'import compiler/ast; echo "compiler/ast resolves OK"' > /tmp/compiler_check.nim
-          nim c -r /tmp/compiler_check.nim
-      - name: Install mkdocs (nim variant)
-        run: pip install mkdocs-material mkdocstrings-nim
-      - name: Build
-        run: |
-          if [ -f mkdocs.yml ]; then
-            mkdocs build --strict
-          else
-            echo "No root mkdocs.yml found; skipping template root docs build."
-          fi
-      - name: Deploy to gh-pages
-        run: |
-          if [ -f mkdocs.yml ]; then
-            mkdocs gh-deploy --force
-          fi
+          node-version: 20
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install documentation dependencies
+        run: cd docs && npm install
+
+      - name: Build Docs
+        run: cd docs && npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

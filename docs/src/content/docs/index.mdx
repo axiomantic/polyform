@@ -1,0 +1,71 @@
+---
+title: Polyform
+description: Composable Copier megatemplate for Nim, Python, TypeScript/WASM, C/C++ HeaderKit FFI, and Embedded RTOS projects.
+template: splash
+hero:
+  tagline: Composable Copier megatemplate for multi-target Nim, Python, TypeScript/WASM, C/C++ HeaderKit FFI, and Embedded RTOS projects.
+  image:
+    html: "🧬"
+  actions:
+    - text: Getting Started
+      link: ./guide/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Copier Options Reference
+      link: ./reference/copier-options/
+      icon: document
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Quick Start
+
+Scaffold a new polyglot repository with [Copier](https://copier.readthedocs.io/):
+
+```bash
+# Zero-install invocation via uvx
+uvx copier copy --trust gh:axiomantic/polyform my-project
+
+cd my-project
+just setup
+just test
+```
+
+## Architecture & Composable Facet Matrix
+
+Polyform generates tailored, closed-circuit repositories from a composable matrix of language toolchains and bridge strategies:
+
+```mermaid
+flowchart TD
+    Copier["copier copy gh:axiomantic/polyform"] --> Facets["Composable Language & Target Facets"]
+
+    Facets --> Nim["has_nim (Nim 2.2+ / Nimony CI / nph)"]
+    Facets --> Py["has_python (uv / ruff / pytest / PEP 703 3.13t & 3.14t)"]
+    Facets --> TS["has_typescript (TypeScript / Vitest / npm)"]
+    Facets --> CCpp["has_c_cpp (C/C++ Headers & CMake)"]
+    Facets --> Emb["has_embedded (Standalone ARC / Zephyr / FreeRTOS)"]
+
+    Nim & Py --> PyBridge["python_bridge_strategy: naganim | ctypes_cabi | none"]
+    Nim & TS --> TSBridge["ts_bridge_strategy: wasm | napi | none"]
+    Nim & CCpp --> CBridge["c_binding_strategy: headerkit | cmake_static | none"]
+
+    PyBridge & TSBridge & CBridge & Emb --> Output["Generated Project (justfile + CI + Starlight Docs + .copier-answers.yml)"]
+```
+
+## Core Capabilities
+
+<CardGrid stagger>
+  <Card title="Composable Multi-Language Facets" icon="puzzle">
+    Combine Nim (`has_nim`), Python (`has_python`), TypeScript (`has_typescript`), C/C++ (`has_c_cpp`), and freestanding Embedded (`has_embedded`) facets in any valid topology.
+  </Card>
+  <Card title="First-Class Native Bridges" icon="rocket">
+    Pre-wired bridges for Python (`naganim` CPython `abi3`/`abi3t` + CFFI or `ctypes_cabi`), TypeScript (`wasm` Emscripten/standalone or `napi`), and C/C++ (`headerkit` declarative FFI).
+  </Card>
+  <Card title="Non-Destructive Template Upgrades" icon="seti:git">
+    Downstream repositories track `.copier-answers.yml` so `uvx copier update --trust` cleanly merges upstream CI, toolchain, and template improvements.
+  </Card>
+  <Card title="Hardened CI & Release Pipelines" icon="seti:pipeline">
+    Includes Nimony (Nim 3.0 preview) checks, PEP 703 Free-Threaded Python (`3.13t`/`3.14t`) `cibuildwheel` matrices, Renovate/Dependabot configs, and Astro Starlight API docs.
+  </Card>
+</CardGrid>

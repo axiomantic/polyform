@@ -19,11 +19,18 @@ lint flavor="all":
 fmt:
     uvx copier --version >/dev/null 2>&1 || true
 
-# 5. Clean Temporary Fixtures & Artifacts
-clean:
-    rm -rf /tmp/polyform-fixtures-* nimcache site
+# 5. Documentation Dev Server & Production Build
+docs:
+    cd docs && npm install && npm run dev
 
-# 6. Secret Scanning
+docs-build:
+    cd docs && npm install && npm run build
+
+# 6. Clean Temporary Fixtures & Artifacts
+clean:
+    rm -rf /tmp/polyform-fixtures-* nimcache site docs/dist docs/.astro docs/node_modules
+
+# 7. Secret Scanning
 check-secrets:
     @if command -v gitleaks >/dev/null 2>&1; then \
         gitleaks detect -v; \
