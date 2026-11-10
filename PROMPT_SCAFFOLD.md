@@ -1,6 +1,6 @@
 # Polyform AI Assistant Scaffolding Protocol
 
-This document defines the canonical instruction protocol for AI coding assistants (such as Claude Code, Antigravity, OpenCode, Codex, or Cursor) when scaffolding a new Nim or polyglot bridge project using **Polyform**.
+This document defines the canonical instruction protocol for AI coding assistants (such as Claude Code, Antigravity, OpenCode, Codex, or Cursor) when scaffolding a new multi-target project (Nim, Python, TypeScript/WASM, C/C++ HeaderKit FFI, Embedded RTOS) using **Polyform**.
 
 ---
 
@@ -8,10 +8,10 @@ This document defines the canonical instruction protocol for AI coding assistant
 
 <CRITICAL>
 **ASK FIRST MANDATE**:
-When an operator requests a new Nim library, CLI, WASM bridge, Python wheel, or C/C++ binding, NEVER generate ad-hoc project files (e.g. manual `.nimble`, `nim.cfg`, CI workflows, or justfiles) from scratch.
+When an operator requests a new library, CLI, WASM bridge, Python wheel, C/C++ binding, embedded profile, or multi-target project, NEVER generate ad-hoc project files (e.g. manual `.nimble`, `pyproject.toml`, `package.json`, CI workflows, or justfiles) from scratch.
 
 You MUST first **ASK** the user if they want to scaffold with the Polyform megatemplate:
-> "Would you like me to scaffold this new Nim project using the standard Polyform megatemplate (`gh:axiomantic/polyform`)?"
+> "Would you like me to scaffold this new project using the standard Polyform megatemplate (`gh:axiomantic/polyform`)?"
 
 Only proceed with scaffolding once confirmed.
 </CRITICAL>

@@ -1,23 +1,64 @@
-# Polyform: Universal Polyglot Megatemplate
+# Polyform: Composable Multi-Target Copier Megatemplate
 
+[![Docs](https://img.shields.io/badge/docs-axiomantic.github.io%2Fpolyform-blue.svg)](https://axiomantic.github.io/polyform/)
 [![CI](https://github.com/axiomantic/polyform/actions/workflows/ci.yml/badge.svg)](https://github.com/axiomantic/polyform/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Copier](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/copier-org/copier/master/img/badge/badge-grayscale-inverted.json)](https://github.com/copier-org/copier)
 
-**Polyform** is an industrial-grade polyglot megatemplate engineered for production Nim applications and native bridges. Powered by [Copier](https://copier.readthedocs.io/), Polyform delivers clean multi-flavor scaffolding, seamless upgrades via `copier update`, and closed-circuit tooling across pure Nim, TypeScript/WASM, Python native wheels, and C/C++ foreign function interfaces.
+**Polyform** is a composable Copier megatemplate for multi-target Nim, Python, TypeScript/WASM, C/C++ HeaderKit FFI, and Embedded RTOS projects. Powered by [Copier](https://copier.readthedocs.io/), Polyform delivers clean composable facet scaffolding, seamless upgrades via `copier update`, and closed-circuit tooling across pure Nim, TypeScript/WASM, Python native wheels, C/C++ foreign function interfaces, and freestanding embedded microcontrollers.
+
+> 📖 **Official Documentation**: Guides, architecture walk-throughs, and complete configuration options are available at **[https://axiomantic.github.io/polyform/](https://axiomantic.github.io/polyform/)**.
 
 ---
 
-## Architectural Flavor Matrix
+## Composable Language & Target Facet Matrix
 
-Polyform provides four out-of-the-box architectural flavor topologies:
+Rather than locking projects into rigid silos, Polyform features an orthogonal, composable facet matrix. You can toggle any valid combination of languages, runtime bridge strategies, and foreign interfaces:
 
-| Flavor | Target Architecture | Toolchain & Runtime | Packaging & DevEx |
+### Core Language & Environment Facets
+
+| Facet | Description | Included Toolchains & Capabilities |
+| :--- | :--- | :--- |
+| **`has_nim`** | Nim language toolchain | Nim 2.2+, `nimble`, `nph` formatter, Nimony (Nim 3.0 preview) CI |
+| **`has_python`** | Python environment & wheels | `uv`, `ruff`, `pytest`, PEP 621, PEP 703 Free-Threaded Python (`3.13t` & `3.14t`) |
+| **`has_typescript`** | TypeScript & JavaScript bridge | Node.js 24, Vite, `vitest`, `tsconfig`, npm packaging |
+| **`has_c_cpp`** | Foreign C/C++ integration | C/C++ headers, CMake build harness, static/shared library artifacts |
+| **`has_embedded`** | Freestanding Embedded profile | Standalone ARC memory management, zero OS dependencies, RTOS headers |
+
+### Native Bridge Strategies
+
+When combining multiple language facets, Polyform wires idiomatic native bridges:
+
+- **`python_bridge_strategy`**:
+  - `naganim`: High-performance CPython `abi3`/`abi3t` extension module with CFFI fallback.
+  - `ctypes_cabi`: Pure C ABI dynamic library with Python `ctypes` bindings.
+  - `none`: Disables Python FFI bridging.
+- **`ts_bridge_strategy`**:
+  - `wasm`: Compiles native code to WebAssembly with ESM runtime via `@axiomantic/nimts`.
+  - `napi`: Compiles Node.js native addon (N-API).
+  - `none`: Disables TypeScript bridging.
+- **`c_binding_strategy`**:
+  - `headerkit`: Automated declarative FFI generation via `headerkit>=0.51.0` and `headerkit.toml`.
+  - `cmake_static`: Standard CMake compilation to foreign archive without automated generator.
+  - `none`: Disables foreign binding generation.
+- **`embedded_runtime_target`**:
+  - `standalone_arc`: Freestanding C translation with standalone ARC (`--os:standalone --mm:arc`).
+  - `zephyr`: Zephyr RTOS module integration.
+  - `freertos`: FreeRTOS task and static allocation profile.
+  - `none`: Disables embedded target orientation.
+
+### Quick-Select Flavor Presets
+
+For standard project archetypes, Polyform provides 4 pre-configured quick-select flavor presets that automatically set baseline facets:
+
+| Flavor Preset | Archetype | Active Facets & Bridges | Primary Use Case |
 | :--- | :--- | :--- | :--- |
-| **`pure_nim`** | Pure Nim Library / CLI | Nim 2.2+, `nimble` | Single or multi-file layout, Starlight docs portal |
-| **`nim_ts_wasm`** | TypeScript WebAssembly Bridge | Nim C-backend + Emscripten / WASM | ESM bindings, TypeScript types, Vitest test suite, npm packaging |
-| **`nim_python_wheel`** | Nim Native Python Wheel | `scikit-build-core`, CMake, `ctypes` | PEP 621 wheels, `cibuildwheel` matrix, pytest test suite |
-| **`headerkit_binding`** | HeaderKit C/C++ Binding Extension | HeaderKit FFI wrapper, C header | Automated FFI generator, foreign symbol tripwire verification |
+| **`pure_nim`** | Pure Nim Library / CLI | `has_nim=true` | High-performance CLI tools, servers, libraries |
+| **`nim_ts_wasm`** | TypeScript / WASM Bridge | `has_nim=true`, `has_typescript=true`, `ts_bridge_strategy="wasm"` | In-browser computation, full-stack web, npm packages |
+| **`nim_python_wheel`** | Native Python Wheel | `has_nim=true`, `has_python=true`, `python_bridge_strategy="naganim"` | PyPI distribution, numerical kernels, data science extensions |
+| **`headerkit_binding`** | HeaderKit C/C++ Binding | `has_nim=true`, `has_c_cpp=true`, `c_binding_strategy="headerkit"` | Seamless FFI wrapper around foreign C/C++ libraries |
+
+> **Note on Custom Combinations:** Facets are completely orthogonal. You can freely combine `has_python=true` + `has_c_cpp=true` + `c_binding_strategy="headerkit"` without Nim, or combine all facets (`has_nim` + `has_python` + `has_typescript` + `has_c_cpp` + `has_embedded`) for unified cross-platform distribution.
 
 ---
 
@@ -49,7 +90,7 @@ You can generate downstream repositories directly from GitHub's Web UI:
 When pairing with an AI coding assistant (Claude Code, Antigravity, OpenCode, Cursor, Codex), use [`PROMPT_SCAFFOLD.md`](PROMPT_SCAFFOLD.md) to safely scaffold new projects with zero guessing.
 
 Instruct your assistant:
-> "Read `PROMPT_SCAFFOLD.md` and help me scaffold a new Nim project."
+> "Read `PROMPT_SCAFFOLD.md` and help me scaffold a new project with Polyform."
 
 You can also register the greenfield invariant in your global `~/AGENTS.md` (or `~/.gemini/AGENTS.md`):
 

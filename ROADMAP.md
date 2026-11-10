@@ -5,7 +5,7 @@
 
 ## Season: v0.1.0 (0% Complete — 0/1)
 
-- [ ] **[SOWN]** Build Polyform: Composable Polyglot Megatemplate with Copier & HeaderKit `[build-polyform-composable-polyglot-megatemplate-with-copier-headerkit]` `tags:copier,nim,typescript,python,headerkit,template` <!-- id:build-polyform-composable-polyglot-megatemplate-with-copier-headerkit status:SOWN -->
+- [ ] **[SOWN]** Build Polyform: Composable Multi-Target Megatemplate with Copier & HeaderKit `[build-polyform-composable-polyglot-megatemplate-with-copier-headerkit]` `tags:copier,nim,typescript,python,headerkit,template` <!-- id:build-polyform-composable-polyglot-megatemplate-with-copier-headerkit status:SOWN -->
 
 ## Season: current (100% Complete — 4/4)
 
