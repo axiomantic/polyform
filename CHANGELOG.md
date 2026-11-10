@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Root Astro Starlight Documentation Site & GitHub Pages Workflow:** Added `docs/` (`package.json`, `astro.config.mjs`, `tsconfig.json`, `src/content.config.ts`, `index.mdx`, `guide/getting-started.md`, `guide/flavors-and-facets.md`, `reference/copier-options.md`, `reference/downstream-docs.md`) and `just docs` / `just docs-build` recipes documenting Polyform's Copier options, 4 architectural flavor presets, and composable language/bridge facets, and replaced the legacy MkDocs `.github/workflows/docs.yml` with an Astro Starlight GitHub Pages deployment workflow (`actions/upload-pages-artifact@v3` + `actions/deploy-pages@v4`).
+- **Root Astro Starlight Documentation Site & GitHub Pages Workflow:** Added `docs/` (`package.json`, `astro.config.mjs`, `tsconfig.json`, `src/content.config.ts`, `index.mdx`, `guide/getting-started.md`, `guide/flavors-and-facets.md`, `reference/copier-options.md`, `reference/downstream-docs.md`) and `just docs` / `just docs-build` recipes documenting Polyform's Copier options, 4 architectural flavor presets, and composable language/bridge facets, and replaced the legacy MkDocs `.github/workflows/docs.yml` with an Astro Starlight GitHub Pages deployment workflow (`actions/upload-pages-artifact@v3` + `actions/deploy-pages@v4` with Node.js 22 for Astro 7 compatibility).
 
 ### Changed
 - **HeaderKit v0.51.0 PyPI Dependency:** Updated `headerkit` minimum version to `>=0.51.0` in `template/pyproject.toml.jinja` and `template/justfile.jinja`.

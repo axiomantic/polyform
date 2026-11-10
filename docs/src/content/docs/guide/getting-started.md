@@ -14,7 +14,7 @@ Depending on the facets enabled in your target project, install the following to
 | **`uv`** (`uvx`) | Runs `copier` and manages Python virtualenvs (`>=3.9`) | Always (for `uvx copier`) / `has_python=true` |
 | **`just`** | Canonical task runner for `setup`, `test`, `lint`, `fmt`, `build` | Always |
 | **`nim`** (`>=2.0`) & **`nimble`** | Nim compiler, package manager, and `nph` formatter | `has_nim=true` |
-| **`node`** (`>=20`) & **`npm`** | TypeScript build/test toolchain and Astro Starlight docs | `has_typescript=true` or `docs_engine="starlight"` |
+| **`node`** (`>=22`) & **`npm`** | TypeScript build/test toolchain and Astro Starlight docs | `has_typescript=true` or `docs_engine="starlight"` |
 | **`cmake`** & C/C++ compiler | Native shared library builds, `scikit-build-core`, and HeaderKit | `has_c_cpp=true` or `python_bridge_strategy in ["naganim", "ctypes_cabi"]` |
 
 ## 1. Interactive Project Scaffolding

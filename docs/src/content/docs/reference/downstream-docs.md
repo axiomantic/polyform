@@ -50,7 +50,7 @@ just docs-build
 
 Whenever commits touching `docs/**`, `src/**`, `tools/**`, or `.github/workflows/docs.yml` are pushed to `main` in a downstream project, `.github/workflows/docs.yml`:
 
-1. Installs Node.js 20 and Nim (`jiro4989/setup-nim-action@v2`).
+1. Installs Node.js 22 and Nim (`jiro4989/setup-nim-action@v2`).
 2. Runs `nim c -r tools/docgen.nim` to refresh the `api/` reference pages.
 3. Runs `cd docs && npm install && npm run build` to produce `docs/dist/`.
 4. Uploads `docs/dist` via `actions/upload-pages-artifact@v3` and deploys to GitHub Pages via `actions/deploy-pages@v4`.
