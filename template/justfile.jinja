@@ -15,7 +15,7 @@ setup:
     python3 -m pip install -e ".[dev]"
 {%- endif %}
 {%- if has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
-    python3 -m pip install "headerkit>=0.50.0"
+    python3 -m pip install "headerkit>=0.51.0"
 {%- elif has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
     python3 -m pip install pyyaml
 {%- endif %}

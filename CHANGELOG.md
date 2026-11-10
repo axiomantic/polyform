@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **HeaderKit v0.51.0 PyPI Dependency:** Updated `headerkit` minimum version to `>=0.51.0` in `template/pyproject.toml.jinja` and `template/justfile.jinja`.
+
 ## [0.4.0] - 2026-11-03
 
 ### Added

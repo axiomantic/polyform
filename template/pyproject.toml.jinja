@@ -35,7 +35,7 @@ dev = [
     "cmake>=3.18",
 {%- endif %}
 {%- if has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
-    "headerkit>=0.50.0",
+    "headerkit>=0.51.0",
 {%- endif %}
 ]
 test = [
