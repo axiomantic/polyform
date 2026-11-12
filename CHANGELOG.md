@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Universal Nim Test Cache & Binary Auto-Cleanup:** Isolated Nim build and test compilation caches to project-scoped `nimcache/tests/$projectName` via `template/tests/config.nims.jinja` and `--nimcache:"nimcache/$projectName"` in `template/nim.cfg.jinja`, eliminating multi-gigabyte disk exhaustion caused by leaked `~/.cache/nim/test_*` build caches across downstream projects.
+- **Automatic Test Binary Pruning & Cache Recipes:** Added automatic post-test binary pruning in `template/{{ package_name }}.nimble.jinja` and `just test-nim`, added `just clean-cache` recipe across root and template justfiles, and updated `clean` to purge `nimcache/` and any stray test binaries.
 - **Declarative Repository Protection & Branch Rulesets:** Added `.github/rulesets/main-protection.json` and downstream template `template/.github/rulesets/main-protection.json.jinja` enforcing branch deletion prevention, non-fast-forward push blocking, and required `Secrets Scan` status checks on the default branch with repository admin bypass.
 - **Automated Protection Manager (`scripts/protect_repo.py`):** Added idempotent Python CLI utility (`scripts/protect_repo.py` and downstream template `template/scripts/protect_repo.py.jinja`) with `--check` drift audit mode and `--apply` configuration mode for GitHub Secret Scanning, Push Protection, and branch protection rulesets via `gh api`.
 - **Branch Protection & Audit Recipes:** Added `protect-repo` and `check-protection` recipes across root `justfile` and downstream `template/justfile.jinja`.

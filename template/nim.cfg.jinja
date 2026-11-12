@@ -15,3 +15,6 @@
 
 # Utilize all available CPU cores for the C compiler backend
 --parallelBuild:0
+
+# Project-scoped build cache (prevents cache leakage into ~/.cache/nim)
+--nimcache:"nimcache/$projectName"

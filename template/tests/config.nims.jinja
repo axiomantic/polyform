@@ -1,6 +1,11 @@
-import std/os
+import std/[os, strutils]
 
 switch("path", thisDir() / "../src")
+
+# Project-scoped test cache & binary isolation (prevents ~/.cache/nim and tests/ pollution)
+let testCacheRoot = getEnv("NIMCACHE", thisDir() / "../nimcache") / "tests"
+switch("nimcache", testCacheRoot / projectName())
+switch("outdir", thisDir() / "../nimcache/bin")
 {%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
 switch("cincludes", thisDir() / "../include")
 switch("compile", thisDir() / "../include/{{ package_name }}.c")

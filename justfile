@@ -30,6 +30,10 @@ docs-build:
 clean:
     rm -rf /tmp/polyform-fixtures-* nimcache site docs/dist docs/.astro docs/node_modules
 
+# Clean local build and test nimcaches
+clean-cache:
+    rm -rf nimcache /tmp/polyform-fixtures-*
+
 # 7. Secret Scanning
 check-secrets:
     @if command -v gitleaks >/dev/null 2>&1; then \

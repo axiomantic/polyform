@@ -268,6 +268,10 @@ assert "pull_request" in rule_types, "Missing pull_request rule"
     test -f "${DEST}/tests/test_${PKG_SLUG}.nim"
     grep -q "Nimony 3.0 Compatibility Check" "${DEST}/.github/workflows/ci.yml"
     grep -q "check-nimony:" "${DEST}/justfile"
+    grep -q -- '--nimcache:"nimcache/\$projectName"' "${DEST}/nim.cfg"
+    grep -q "testCacheRoot" "${DEST}/tests/config.nims"
+    grep -q "clean-cache:" "${DEST}/justfile"
+    grep -q "clean-cache:" "${REPO_ROOT}/justfile"
   fi
 
   # Negative control: non-python fixtures must not have Python artifacts
@@ -473,6 +477,19 @@ for wf in glob.glob("'"${DEST}"'/.github/workflows/*.yml"):
     # Canonical command surface check: 'just test' must pass cleanly
     echo ">>> [TEST] Verifying canonical command surface 'just test'..."
     (cd "${DEST}" && just test)
+
+    if [[ "${HAS_NIM}" == "true" ]]; then
+      # Anti-carcass assertion: zero stray compiled test binaries left in tests/
+      STRAY_BINARIES=$(find "${DEST}/tests" -maxdepth 1 -type f -perm +111 ! -name "*.*" 2>/dev/null || true)
+      if [[ -n "${STRAY_BINARIES}" ]]; then
+        echo "ERROR: Found stray compiled test binaries in ${DEST}/tests:" >&2
+        echo "${STRAY_BINARIES}" >&2
+        exit 1
+      fi
+      # Verify clean-cache recipe works
+      (cd "${DEST}" && just clean-cache)
+      test ! -d "${DEST}/nimcache"
+    fi
 
     echo ">>> [TEST] ${FIXTURE} test suites passed 100% green."
   fi

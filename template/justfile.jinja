@@ -39,6 +39,7 @@ test:
 
 test-nim:
     nimble test
+    @find tests -maxdepth 1 -type f -perm +111 ! -name "*.*" -delete 2>/dev/null || true
 {%- endif %}
 {%- if has_python %}
 
@@ -163,6 +164,11 @@ docs-build:
 clean:
     rm -rf nimcache htmldocs site docs/dist docs/.astro tools/docgen dist .venv
     find . -name '*.exe' -delete
+    find tests -maxdepth 1 -type f -perm +111 ! -name "*.*" -delete 2>/dev/null || true
+
+# Clean local build and test nimcaches
+clean-cache:
+    rm -rf nimcache
 
 # 9. Secret Scanning
 check-secrets:
