@@ -449,6 +449,57 @@ for wf in glob.glob("'"${DEST}"'/.github/workflows/*.yml"):
     if [[ "${HAS_NIM}" == "true" ]]; then
       (cd "${DEST}" && nimble test)
       (cd "${DEST}" && just check-nimony)
+
+      echo ">>> [TEST] Verifying bounded per-suite test runner contract..."
+      NIMBLE_FILE="${DEST}/${PKG_SLUG}.nimble"
+      TIMEOUT_ENV="$(echo "${PKG_SLUG}" | tr '[:lower:]' '[:upper:]')_TEST_TIMEOUT"
+      grep -q 'DefaultSuiteTimeoutSec = 300' "${NIMBLE_FILE}"
+      grep -q -- '--kill-after=10' "${NIMBLE_FILE}"
+      grep -q "TimeoutEnvVar = \"${TIMEOUT_ENV}\"" "${NIMBLE_FILE}"
+      RAW_RUNS=$(grep -nE 'exec "nim (r |c .*-r )' "${NIMBLE_FILE}" | grep -v 'tools/docgen.nim' || true)
+      if [[ -n "${RAW_RUNS}" ]]; then
+        echo "ERROR: unbounded raw 'nim r' / 'nim c -r' test execution in ${NIMBLE_FILE}:" >&2
+        echo "${RAW_RUNS}" >&2
+        exit 1
+      fi
+
+      # Negative control 1: a hanging suite must be killed and reported, not stall.
+      # It also reads stdin, which must be the null device (EOF, never a TTY block).
+      HANG_SUITE="${DEST}/tests/test_zz_hang.nim"
+      printf 'import std/os\ndiscard stdin.readAll()\nwhile true:\n  sleep(100)\n' > "${HANG_SUITE}"
+      HANG_START=$(date +%s)
+      set +e
+      HANG_OUT=$(cd "${DEST}" && env "${TIMEOUT_ENV}=3" nimble test 2>&1)
+      HANG_RC=$?
+      set -e
+      HANG_ELAPSED=$(( $(date +%s) - HANG_START ))
+      rm -f "${HANG_SUITE}"
+      if [[ "${HANG_RC}" -eq 0 ]]; then
+        echo "ERROR: nimble test passed despite a hanging suite (timeout not enforced)" >&2
+        exit 1
+      fi
+      if ! grep -q "TIMEOUT: tests/test_zz_hang.nim exceeded 3s" <<< "${HANG_OUT}"; then
+        echo "ERROR: expected 'TIMEOUT: tests/test_zz_hang.nim exceeded 3s' in output:" >&2
+        echo "${HANG_OUT}" >&2
+        exit 1
+      fi
+      # Bound: compile time for all suites + 3s budget; must be far below unbounded.
+      if [[ "${HANG_ELAPSED}" -gt 120 ]]; then
+        echo "ERROR: hanging suite took ${HANG_ELAPSED}s; timeout bound ineffective" >&2
+        exit 1
+      fi
+
+      # Negative control 2: a malformed override is rejected, never silently ignored.
+      set +e
+      BAD_OUT=$(cd "${DEST}" && env "${TIMEOUT_ENV}=abc" nimble test 2>&1)
+      BAD_RC=$?
+      set -e
+      if [[ "${BAD_RC}" -eq 0 ]] || ! grep -q "ERROR: ${TIMEOUT_ENV}='abc' is not an integer" <<< "${BAD_OUT}"; then
+        echo "ERROR: malformed ${TIMEOUT_ENV} was not rejected (rc=${BAD_RC}):" >&2
+        echo "${BAD_OUT}" >&2
+        exit 1
+      fi
+      echo ">>> [TEST] Bounded test runner enforced timeout (${HANG_ELAPSED}s) and rejected bad override."
     fi
     if [[ "${HAS_TYPESCRIPT}" == "true" && "${TS_BRIDGE}" == "wasm" ]]; then
       echo ">>> [BUILD] Compiling WASM module..."

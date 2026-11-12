@@ -1,4 +1,4 @@
-import std/os
+import std/[os, strutils]
 
 # Package
 
@@ -13,14 +13,45 @@ installExt = @["nim"]
 
 requires "nim >= 2.0.0"
 
-# Tasks
+# Bounded test runner
+#
+# std/unittest has no per-test timeout, so every suite runs under a wall-clock
+# bound enforced here. Compilation is unbounded; execution is wrapped in GNU
+# `timeout --kill-after=10 <secs>` with stdin redirected from the null device so
+# a suite can never block on a TTY read. Override the budget with
+# `{{ package_name | upper }}_TEST_TIMEOUT=<secs>`; `=0` disables the bound for
+# local debugging only.
 
-task test, "Run test suite":
-  for file in listFiles("tests"):
-    if (file.startsWith("tests/test") or file.startsWith("tests/t")) and
-        file.endsWith(".nim") and not file.endsWith("config.nims"):
-      exec "nim r --hints:off " & file
-  # Auto-prune any compiled test binaries without extension left in tests/
+const
+  DefaultSuiteTimeoutSec = 300
+  TimeoutEnvVar = "{{ package_name | upper }}_TEST_TIMEOUT"
+
+proc suiteTimeoutSec(default: int): int =
+  if not existsEnv(TimeoutEnvVar):
+    return default
+  let raw = getEnv(TimeoutEnvVar).strip()
+  try:
+    result = parseInt(raw)
+  except ValueError:
+    quit("ERROR: " & TimeoutEnvVar & "='" & raw & "' is not an integer", 1)
+  if result < 0:
+    quit("ERROR: " & TimeoutEnvVar & " must be >= 0 (got " & raw & ")", 1)
+
+proc timeoutExe(): string =
+  ## Resolve a GNU-compatible `timeout`; fail fast rather than run unbounded.
+  for candidate in ["gtimeout", "timeout"]:
+    let exe = findExe(candidate)
+    if exe.len > 0 and gorgeEx(quoteShell(exe) & " --version").exitCode == 0:
+      return exe
+  quit(
+    "ERROR: no GNU `timeout`/`gtimeout` on PATH; refusing to run test " &
+      "suites unbounded (macOS: brew install coreutils; or set " & TimeoutEnvVar &
+      "=0 to opt out for local debugging)",
+    1,
+  )
+
+proc pruneTestBinaries() =
+  ## Remove compiled test binaries without an extension left in tests/.
   for file in listFiles("tests"):
     let (_, _, ext) = splitFile(file)
     if ext.len == 0 and file.fileExists:
@@ -28,6 +59,44 @@ task test, "Run test suite":
         rmFile(file)
       except OSError:
         discard
+
+proc runSuite(file: string, timeoutSec = DefaultSuiteTimeoutSec) =
+  ## Compile `file`, then execute it under a wall-clock bound.
+  let
+    secs = suiteTimeoutSec(timeoutSec)
+    bin = thisDir() / "nimcache" / "bin" / splitFile(file).name & ExeExt
+  exec "nim c --hints:off -o:" & quoteShell(bin) & " " & quoteShell(file)
+  when defined(windows):
+    const devNull = "NUL"
+  else:
+    const devNull = "/dev/null"
+  if secs == 0:
+    echo "WARNING: " & TimeoutEnvVar & "=0; running " & file & " unbounded"
+    exec quoteShell(bin) & " < " & devNull
+    return
+  let bounded =
+    quoteShell(timeoutExe()) & " --kill-after=10 " & $secs & " " & quoteShell(bin) &
+    " < " & devNull
+  when defined(windows):
+    exec bounded
+  else:
+    exec bounded & " || { rc=$?; if [ $rc -eq 124 ] || [ $rc -eq 137 ]; then " &
+      "echo \"TIMEOUT: " & file & " exceeded " & $secs & "s\" >&2; fi; exit $rc; }"
+
+proc testSuites(): seq[string] =
+  for file in listFiles("tests"):
+    let name = splitFile(file).name
+    if name.startsWith("test") and file.endsWith(".nim"):
+      result.add file
+
+# Tasks
+
+task test, "Run test suite (each suite bounded by a wall-clock timeout)":
+  try:
+    for file in testSuites():
+      runSuite(file)
+  finally:
+    pruneTestBinaries()
 {%- if docs_engine == 'starlight' %}
 
 task docgen, "Generate API documentation for Starlight":

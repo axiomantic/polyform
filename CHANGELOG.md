@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Bounded Per-Suite Nim Test Runner:** `template/{{ package_name }}.nimble.jinja` now routes every test suite through `runSuite`, which compiles each suite (unbounded) and runs it under GNU `timeout --kill-after=10 <secs>` (default 300s) with stdin redirected from the null device. Timeouts (exit 124/137) report `TIMEOUT: <suite> exceeded <N>s` and fail the task; `<PACKAGE>_TEST_TIMEOUT=<secs>` overrides the budget (`=0` is the only opt-out); a missing `timeout`/`gtimeout` fails fast instead of running unbounded. `tests/test_fixtures.sh` asserts the contract with hanging-suite, stdin, and malformed-override negative controls, and downstream `AGENTS.md` / `NEXT_STEPS.md` document the pattern.
+
 ## [0.5.0] - 2026-11-11
 
 ### Added

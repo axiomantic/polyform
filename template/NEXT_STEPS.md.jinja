@@ -116,6 +116,7 @@ just check-protection
 - **Nimble Package Definition**: `{{ package_name }}.nimble`
 - **Tests**: `tests/` (run via `just test` or `nimble test`)
 - **Build & Test Cache Isolation**: Compilation caches are scoped under project-local `nimcache/tests/` via `nim.cfg` and `tests/config.nims` (preventing disk bloat in `~/.cache/nim`), test binaries are auto-pruned upon test completion, and caches can be purged with `just clean-cache`.
+- **Bounded Test Suites**: `nimble test` compiles each suite, then runs it under GNU `timeout --kill-after=10 300` with stdin from `/dev/null`, so a hung suite fails with `TIMEOUT: <suite> exceeded <N>s` instead of stalling CI. Override with `{{ package_name | upper }}_TEST_TIMEOUT=<secs>` (`=0` disables the bound for local debugging). Requires GNU coreutils on PATH (macOS: `brew install coreutils`).
 {%- endif %}
 {%- if has_typescript and (ts_bridge_strategy | default('none')) == 'wasm' %}
 ### TypeScript / WebAssembly Bridge
