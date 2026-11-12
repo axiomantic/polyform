@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-11
+
 ### Added
 - **Universal Nim Test Cache & Binary Auto-Cleanup:** Isolated Nim build and test compilation caches to project-scoped `nimcache/tests/$projectName` via `template/tests/config.nims.jinja` and `--nimcache:"nimcache/$projectName"` in `template/nim.cfg.jinja`, eliminating multi-gigabyte disk exhaustion caused by leaked `~/.cache/nim/test_*` build caches across downstream projects.
 - **Automatic Test Binary Pruning & Cache Recipes:** Added automatic post-test binary pruning in `template/{{ package_name }}.nimble.jinja` and `just test-nim`, added `just clean-cache` recipe across root and template justfiles, and updated `clean` to purge `nimcache/` and any stray test binaries.
