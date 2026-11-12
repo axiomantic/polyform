@@ -478,8 +478,8 @@ for wf in glob.glob("'"${DEST}"'/.github/workflows/*.yml"):
         echo "ERROR: nimble test passed despite a hanging suite (timeout not enforced)" >&2
         exit 1
       fi
-      if ! grep -q "TIMEOUT: tests/test_zz_hang.nim exceeded 3s" <<< "${HANG_OUT}"; then
-        echo "ERROR: expected 'TIMEOUT: tests/test_zz_hang.nim exceeded 3s' in output:" >&2
+      if ! grep -qx "TIMEOUT: tests/test_zz_hang.nim exceeded 3s" <<< "${HANG_OUT}"; then
+        echo "ERROR: expected a standalone 'TIMEOUT: tests/test_zz_hang.nim exceeded 3s' line in output:" >&2
         echo "${HANG_OUT}" >&2
         exit 1
       fi
@@ -489,7 +489,35 @@ for wf in glob.glob("'"${DEST}"'/.github/workflows/*.yml"):
         exit 1
       fi
 
-      # Negative control 2: a malformed override is rejected, never silently ignored.
+      # Negative control 2: an ordinarily failing suite fails the task WITHOUT a
+      # TIMEOUT report, and the failure text never carries the marker. Uses the
+      # bare 't' prefix to prove tests/t*.nim modules are discovered.
+      FAIL_SUITE="${DEST}/tests/tzz_fail.nim"
+      printf 'quit(1)\n' > "${FAIL_SUITE}"
+      set +e
+      FAIL_OUT=$(cd "${DEST}" && env "${TIMEOUT_ENV}=3" nimble test 2>&1)
+      FAIL_RC=$?
+      set -e
+      rm -f "${FAIL_SUITE}"
+      if [[ "${FAIL_RC}" -eq 0 ]]; then
+        echo "ERROR: nimble test passed despite failing tests/tzz_fail.nim (t*.nim not discovered?)" >&2
+        exit 1
+      fi
+      if grep -q "TIMEOUT:" <<< "${FAIL_OUT}"; then
+        echo "ERROR: ordinary suite failure was reported with TIMEOUT text:" >&2
+        echo "${FAIL_OUT}" >&2
+        exit 1
+      fi
+
+      # Compiled suite binaries are removed after pass, fail, and timeout alike.
+      LEFTOVER_BINS=$(find "${DEST}/nimcache/bin" -type f 2>/dev/null || true)
+      if [[ -n "${LEFTOVER_BINS}" ]]; then
+        echo "ERROR: compiled suite binaries left in nimcache/bin:" >&2
+        echo "${LEFTOVER_BINS}" >&2
+        exit 1
+      fi
+
+      # Negative control 3: a malformed override is rejected, never silently ignored.
       set +e
       BAD_OUT=$(cd "${DEST}" && env "${TIMEOUT_ENV}=abc" nimble test 2>&1)
       BAD_RC=$?

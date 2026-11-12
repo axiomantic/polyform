@@ -61,32 +61,46 @@ proc pruneTestBinaries() =
         discard
 
 proc runSuite(file: string, timeoutSec = DefaultSuiteTimeoutSec) =
-  ## Compile `file`, then execute it under a wall-clock bound.
+  ## Compile `file`, then execute it under a wall-clock bound. The compiled
+  ## binary is removed afterwards whether the suite passes, fails, or times out.
   let
     secs = suiteTimeoutSec(timeoutSec)
+    limiter =
+      if secs == 0:
+        ""
+      else:
+        timeoutExe()
     bin = thisDir() / "nimcache" / "bin" / splitFile(file).name & ExeExt
-  exec "nim c --hints:off -o:" & quoteShell(bin) & " " & quoteShell(file)
   when defined(windows):
     const devNull = "NUL"
   else:
     const devNull = "/dev/null"
-  if secs == 0:
-    echo "WARNING: " & TimeoutEnvVar & "=0; running " & file & " unbounded"
-    exec quoteShell(bin) & " < " & devNull
-    return
-  let bounded =
-    quoteShell(timeoutExe()) & " --kill-after=10 " & $secs & " " & quoteShell(bin) &
-    " < " & devNull
-  when defined(windows):
-    exec bounded
-  else:
-    exec bounded & " || { rc=$?; if [ $rc -eq 124 ] || [ $rc -eq 137 ]; then " &
-      "echo \"TIMEOUT: " & file & " exceeded " & $secs & "s\" >&2; fi; exit $rc; }"
+  try:
+    exec "nim c --hints:off -o:" & quoteShell(bin) & " " & quoteShell(file)
+    if secs == 0:
+      echo "WARNING: " & TimeoutEnvVar & "=0; running " & file & " unbounded"
+      exec quoteShell(bin) & " < " & devNull
+      return
+    let bounded =
+      quoteShell(limiter) & " --kill-after=10 " & $secs & " " & quoteShell(bin) & " < " &
+      devNull
+    when defined(windows):
+      exec bounded
+    else:
+      # The report is assembled by printf so the literal marker never appears in
+      # the command text that nimscript echoes on any non-zero exit.
+      exec bounded & " || { rc=$?; if [ $rc -eq 124 ] || [ $rc -eq 137 ]; then " &
+        "printf '%sOUT: %s exceeded %ss\\n' TIME " & quoteShell(file) & " " & $secs &
+        " >&2; fi; exit $rc; }"
+  finally:
+    if fileExists(bin):
+      rmFile(bin)
 
 proc testSuites(): seq[string] =
+  ## Nim convention: test modules are `tests/t*.nim` (e.g. `test_foo.nim`, `tfoo.nim`).
   for file in listFiles("tests"):
-    let name = splitFile(file).name
-    if name.startsWith("test") and file.endsWith(".nim"):
+    let (_, name, ext) = splitFile(file)
+    if ext == ".nim" and name.startsWith("t"):
       result.add file
 
 # Tasks
