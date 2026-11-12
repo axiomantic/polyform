@@ -39,3 +39,10 @@ check-secrets:
     else \
         echo "Error: neither gitleaks nor pre-commit found. Install gitleaks or pre-commit." >&2; exit 1; \
     fi
+
+# 8. Repository Security & Branch Protection
+protect-repo:
+    python3 scripts/protect_repo.py
+
+check-protection:
+    python3 scripts/protect_repo.py --check

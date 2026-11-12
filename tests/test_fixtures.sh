@@ -193,9 +193,29 @@ print("Renovate configuration validated successfully.")
   grep -q "update-template:" "${DEST}/justfile"
   grep -q "check-secrets:" "${DEST}/justfile"
   grep -q "check-secrets:" "${REPO_ROOT}/justfile"
+  grep -q "protect-repo:" "${DEST}/justfile"
+  grep -q "check-protection:" "${DEST}/justfile"
+  grep -q "protect-repo:" "${REPO_ROOT}/justfile"
+  grep -q "check-protection:" "${REPO_ROOT}/justfile"
+  test -f "${DEST}/.github/rulesets/main-protection.json"
+  test -f "${DEST}/scripts/protect_repo.py"
+  test -x "${DEST}/scripts/protect_repo.py"
+  python3 -c '
+import json
+with open("'"${DEST}"'/.github/rulesets/main-protection.json", "r") as f:
+    data = json.load(f)
+assert data["name"] == "main-protection", "Ruleset name mismatch"
+assert data["enforcement"] == "active", "Ruleset must be active"
+rule_types = {r["type"] for r in data.get("rules", [])}
+assert "deletion" in rule_types, "Missing deletion rule"
+assert "non_fast_forward" in rule_types, "Missing non_fast_forward rule"
+assert "required_status_checks" in rule_types, "Missing required_status_checks rule"
+assert "pull_request" in rule_types, "Missing pull_request rule"
+'
   grep -q "https://github.com/gitleaks/gitleaks" "${DEST}/.pre-commit-config.yaml"
   grep -q "rev: v8.24.0" "${DEST}/.pre-commit-config.yaml"
   grep -q "secrets-scan:" "${DEST}/.github/workflows/ci.yml"
+  grep -q "secrets-scan:" "${REPO_ROOT}/.github/workflows/ci.yml"
   grep -q 'GITLEAKS_VERSION="8.24.0"' "${DEST}/.github/workflows/ci.yml"
   grep -q "gitleaks detect --verbose" "${DEST}/.github/workflows/ci.yml"
   grep -q "model: ~anthropic/claude-sonnet-latest" "${DEST}/.github/workflows/momus.yml"

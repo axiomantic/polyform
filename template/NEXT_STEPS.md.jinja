@@ -87,7 +87,28 @@ To publish the TypeScript / WASM package to npm:
 
 ---
 
-## 4. Architectural Toolchain Details
+## 4. Repository Security & Branch Protection
+
+Polyform includes defense-in-depth secret scanning and branch protection automation:
+
+- **Pre-commit scanning**: Gitleaks hook runs locally on every commit (`just check-secrets`).
+- **CI scanning**: Dedicated `Secrets Scan` job runs on pull requests and pushes to `main`.
+- **GitHub Secret Scanning & Push Protection**: Blocks accidental secret pushes before acceptance by the server.
+- **Main Branch Ruleset (`.github/rulesets/main-protection.json`)**: Prevents force-pushes (`non_fast_forward`), blocks branch deletion, and requires passing `Secrets Scan` status checks before merge.
+
+To configure or audit repository protection programmatically:
+
+```bash
+# Apply Secret Scanning, Push Protection, and main branch ruleset
+just protect-repo
+
+# Audit protection status and check for drift
+just check-protection
+```
+
+---
+
+## 5. Architectural Toolchain Details
 
 {%- if has_nim %}
 ### Nim Core Library
@@ -122,7 +143,7 @@ To publish the TypeScript / WASM package to npm:
 
 ---
 
-## 5. Local Overrides (`justfile.local`)
+## 6. Local Overrides (`justfile.local`)
 
 To declare project-specific or developer-local `just` recipes without colliding with upstream template updates, create a `justfile.local` in the project root:
 
@@ -136,7 +157,7 @@ my-custom-task:
 
 ---
 
-## 6. Upstream Template Updates
+## 7. Upstream Template Updates
 
 Polyform supports continuous upstream template synchronization via Copier:
 

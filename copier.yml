@@ -218,9 +218,6 @@ _exclude:
   - "{% if not has_embedded %}embedded.cfg{% endif %}"
   - "{% if not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}src/{{ package_name }}{% endif %}"
 
-  # Combined scripts exclusion if neither WASM nor HeaderKit scripts are needed
-  - "{% if not (has_nim and has_typescript and (ts_bridge_strategy | default('none')) == 'wasm') and not (has_nim and has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit') %}scripts{% endif %}"
-
   # Documentation engine exclusions
   - "{% if docs_engine == 'none' %}docs{% endif %}"
   - "{% if docs_engine != 'starlight' %}tools{% endif %}"

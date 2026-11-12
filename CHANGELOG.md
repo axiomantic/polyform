@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Declarative Repository Protection & Branch Rulesets:** Added `.github/rulesets/main-protection.json` and downstream template `template/.github/rulesets/main-protection.json.jinja` enforcing branch deletion prevention, non-fast-forward push blocking, and required `Secrets Scan` status checks on the default branch with repository admin bypass.
+- **Automated Protection Manager (`scripts/protect_repo.py`):** Added idempotent Python CLI utility (`scripts/protect_repo.py` and downstream template `template/scripts/protect_repo.py.jinja`) with `--check` drift audit mode and `--apply` configuration mode for GitHub Secret Scanning, Push Protection, and branch protection rulesets via `gh api`.
+- **Branch Protection & Audit Recipes:** Added `protect-repo` and `check-protection` recipes across root `justfile` and downstream `template/justfile.jinja`.
+- **Standalone CI Secrets Scan:** Added dedicated `Secrets Scan` job running Gitleaks v8.24.0 in root `.github/workflows/ci.yml` matching downstream templates for consistent ruleset status check verification.
 - **Root Astro Starlight Documentation Site & GitHub Pages Workflow:** Added `docs/` (`package.json`, `astro.config.mjs`, `tsconfig.json`, `src/content.config.ts`, `index.mdx`, `guide/getting-started.md`, `guide/flavors-and-facets.md`, `reference/copier-options.md`, `reference/downstream-docs.md`) and `just docs` / `just docs-build` recipes documenting Polyform's Copier options, 4 architectural flavor presets, and composable language/bridge facets, and replaced the legacy MkDocs `.github/workflows/docs.yml` with an Astro Starlight GitHub Pages deployment workflow (`actions/upload-pages-artifact@v3` + `actions/deploy-pages@v4` with Node.js 22 for Astro 7 compatibility).
 
 ### Changed
