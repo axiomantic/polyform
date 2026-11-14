@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-14
+
 ### Added
 - **Hardened Onboarding & Upgrade Protocol with Dynamic Migration Playbooks:** Enhanced `scripts/onboard.py` and `template/scripts/onboard.py.jinja` with automated git delta inspection (`git status --porcelain`, `git diff --stat`, and conflict marker detection), embedded version highlights span catalog (v0.5.0, v0.6.0, v0.7.0), and comprehensive `ONBOARDING.md` upgrade playbook generation. Tailored Phase 2 project hydration in `template/ONBOARDING.md.jinja` across all four language facets (Nim core, TypeScript/WASM, Python ctypes/naganim, and HeaderKit foreign C ABI tripwires). Fixed subshell variable scoping in `template/justfile.jinja` `update-template` recipe by standardizing on `#!/usr/bin/env bash` execution, and added `--no-commit` pass-through flag to `finish-onboarding`.
 - **Active Onboarding & Template Upgrade Protocol with Git Commit Trailers:** Added `template/ONBOARDING.md.jinja` containing self-destructing instructions for AI coding assistants to verify out-of-the-box baselines, interview operators to hydrate `AGENTS.md` with domain abstractions, and configure conditional features (such as `gh-krun-runner` runner topology). Linked via prominent banner at line 1 of `template/AGENTS.md.jinja`. Added `scripts/onboard.py` and `just finish-onboarding` recipe to delete `ONBOARDING.md`, cleanly strip the banner from `AGENTS.md`, and record RFC 822 `Polyform-Template-Ref:` and `Polyform-Onboarded-At:` git commit trailers. Enhanced `just update-template` to re-arm the onboarding directive and generate version-bounded upgrade delta playbooks (`rearm --from <prev> --to <new>`).
