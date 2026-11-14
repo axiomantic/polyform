@@ -23,21 +23,52 @@
 ## Phase 2: Initial Project Hydration (Bootstrap Only)
 
 1. **Verify Baseline Toolchain**:
-   Run the canonical verification suite to ensure a green out-of-the-box baseline:
+   Execute the canonical verification suite to assert a green out-of-the-box baseline:
    ```bash
    just setup && just test && just lint && just check-secrets
    ```
-2. **Domain Architecture Interview**:
-   Ask the operator 3 brief questions before writing domain code:
+
+2. **Verify Flavor-Specific Toolchain & Boundaries**:
+{%- if has_nim %}
+   - **Nim Core**: Verify `{{ package_name }}.nimble` packages and `src/{{ package_name }}.nim` entrypoints.
+{%- endif %}
+{%- if has_typescript %}
+   - **TypeScript / WebAssembly**:
+     - Verify WASM compilation: `just compile-wasm` (compiles Nim to `ts/wasm/`).
+     - Verify Vitest bridge tests: `npm test` or `npx vitest run`.
+     - Inspect `ts/index.ts` to ensure exports and type definitions match project intent.
+{%- endif %}
+{%- if has_python %}
+   - **Python Bindings**:
+     - Verify pytest test suite: `uv run --with pytest pytest tests_py/`.
+     - Verify wheel packaging: `just build-wheel`.
+     - Inspect `src_py/` wrapper and ensure ctypes/naganim symbol loader matches Nim shared library targets.
+{%- endif %}
+{%- if has_c_cpp and (c_binding_strategy | default('none')) == 'headerkit' %}
+   - **C/C++ HeaderKit Integration**:
+     - Verify C ABI tripwire: `nim c -r tests/test_tripwire.nim`.
+     - Inspect generated headers in `include/` and `headerkit.toml`.
+     - Verify bindings generation recipe: `just gen-bindings`.
+{%- endif %}
+{%- if docs_engine == 'starlight' %}
+   - **Starlight Documentation Portal**:
+     - Verify Astro docs portal: `just docs-build` (asserts `docs/dist/index.html` builds cleanly).
+     - Test dev preview server: `just docs-dev`.
+{%- endif %}
+
+3. **Domain Architecture Interview**:
+   Ask the operator 3 brief questions before generating domain code:
    - What are the primary domain abstractions, data models, or core entities?
    - What is the module layout strategy (single-file CLI vs. multi-module package)?
    - Are there specific domain invariants, naming rules, or external services to follow?
-3. **Hydrate `AGENTS.md`**:
+
+4. **Hydrate `AGENTS.md`**:
    - Replace placeholder entries (`| (add per project) | | |`) under `## Key Modules` with actual domain modules.
    - Update `## Architecture Overview` with the project's real purpose.
    - Populate `## Glossary` with domain terminology.
    - Ensure generic template boilerplates are pruned in favor of project-specific guidelines.
-4. Proceed to **Phase 4: Conditional Feature Configuration**.
+
+5. Proceed to **Phase 4: Conditional Feature Configuration**.
 
 ---
 
@@ -48,7 +79,11 @@
      ```bash
      git log -1 -p .copier-answers.yml
      ```
-   - Run `git diff HEAD~1` to review incoming template changes.
+   - Check working tree changes from Copier:
+     ```bash
+     git status --porcelain
+     git diff
+     ```
 2. **Identify Newly Introduced Capabilities**:
    - **v0.5.0**: Gitleaks secret scanning, branch protection rulesets, and `just protect-repo` / `just check-protection`.
    - **v0.6.0**: Bounded per-suite test runner (`runSuite` in `{{ package_name }}.nimble`). Ensure any custom test tasks use `runSuite`.
@@ -103,6 +138,7 @@ Once all steps are completed and approved by the operator:
    ```bash
    just finish-onboarding
    ```
+   *(Or run `just finish-onboarding --no-commit` if you wish to review staged changes and commit manually).*
 2. Verify that:
    - `ONBOARDING.md` has been deleted.
    - The `<!-- POLYFORM_ONBOARDING_START -->` banner has been cleanly removed from `AGENTS.md`.

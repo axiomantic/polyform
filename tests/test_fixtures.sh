@@ -198,8 +198,8 @@ print("Renovate configuration validated successfully.")
   fi
 
   grep -q "update-template:" "${DEST}/justfile"
-  grep -q "finish-onboarding:" "${DEST}/justfile"
-  grep -q "finish-onboarding:" "${REPO_ROOT}/justfile"
+  grep -E -q "^finish-onboarding.*:" "${DEST}/justfile"
+  grep -E -q "^finish-onboarding.*:" "${REPO_ROOT}/justfile"
   grep -q "scripts/onboard.py rearm" "${DEST}/justfile"
   test -f "${DEST}/ONBOARDING.md"
   test -f "${DEST}/scripts/onboard.py"
@@ -602,20 +602,52 @@ for wf in glob.glob("'"${DEST}"'/.github/workflows/*.yml"):
         exit 1
       fi
 
-      # 2. Test upgrade re-arming
+      # 2. Test upgrade re-arming with rich playbook generation
       (cd "${DEST}" && python3 scripts/onboard.py rearm --from v0.6.0 --to v0.7.0)
       test -f "${DEST}/ONBOARDING.md"
       grep -q "<!-- POLYFORM_ONBOARDING_START -->" "${DEST}/AGENTS.md"
       grep -q "v0.6.0 -> v0.7.0" "${DEST}/ONBOARDING.md"
+      grep -q "Copier Working Tree Delta & Status" "${DEST}/ONBOARDING.md"
+      grep -q "Apple Silicon GPU Runner" "${DEST}/ONBOARDING.md"
 
-      # 3. Clean up again
+      # 3. Test --no-commit flag
+      PREV_HEAD=$(cd "${DEST}" && git rev-parse HEAD)
+      (cd "${DEST}" && just finish-onboarding --no-commit)
+      test ! -f "${DEST}/ONBOARDING.md"
+      if grep -q "<!-- POLYFORM_ONBOARDING_START -->" "${DEST}/AGENTS.md"; then
+        echo "ERROR: AGENTS.md banner was not stripped by finish-onboarding --no-commit" >&2
+        exit 1
+      fi
+      CURR_HEAD=$(cd "${DEST}" && git rev-parse HEAD)
+      if [[ "${PREV_HEAD}" != "${CURR_HEAD}" ]]; then
+        echo "ERROR: finish-onboarding --no-commit created an unexpected commit" >&2
+        exit 1
+      fi
+
+      # 4. Simulate a real upgrade delta in .copier-answers.yml and re-arm
+      (cd "${DEST}" && sed -i '' -e 's/^_commit:.*/_commit: v0.7.0/' .copier-answers.yml 2>/dev/null || sed -i -e 's/^_commit:.*/_commit: v0.7.0/' .copier-answers.yml)
+      (cd "${DEST}" && python3 scripts/onboard.py rearm --from v0.6.0 --to v0.7.0)
+      test -f "${DEST}/ONBOARDING.md"
+      grep -q "<!-- POLYFORM_ONBOARDING_START -->" "${DEST}/AGENTS.md"
+
+      # 5. Complete upgrade onboarding and assert upgrade commit message + trailer
       (cd "${DEST}" && just finish-onboarding)
       test ! -f "${DEST}/ONBOARDING.md"
       if grep -q "<!-- POLYFORM_ONBOARDING_START -->" "${DEST}/AGENTS.md"; then
-        echo "ERROR: AGENTS.md banner was not stripped on re-armed finish-onboarding" >&2
+        echo "ERROR: AGENTS.md banner was not stripped on final finish-onboarding" >&2
         exit 1
       fi
-      echo ">>> [TEST] Active onboarding lifecycle verified cleanly (bootstrap -> trailer -> rearm -> finish)."
+      UPGRADE_COMMIT_MSG=$(cd "${DEST}" && git log -1 --pretty=%B)
+      if [[ "${UPGRADE_COMMIT_MSG}" != *"upgrade template from"* ]]; then
+        echo "ERROR: Expected upgrade commit message, got: ${UPGRADE_COMMIT_MSG}" >&2
+        exit 1
+      fi
+      FINAL_TRAILER=$(cd "${DEST}" && git log -1 --grep="Polyform-Template-Ref:" --format="%(trailers:key=Polyform-Template-Ref,valueonly)")
+      if [[ "${FINAL_TRAILER}" != "v0.7.0" ]]; then
+        echo "ERROR: Expected Polyform-Template-Ref v0.7.0, got: ${FINAL_TRAILER}" >&2
+        exit 1
+      fi
+      echo ">>> [TEST] Active onboarding lifecycle verified cleanly (bootstrap -> trailer -> rearm -> no-commit -> simulated upgrade -> upgrade commit)."
     fi
 
     # Canonical command surface check: 'just test' must pass cleanly

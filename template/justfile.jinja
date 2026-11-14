@@ -206,11 +206,16 @@ check-protection:
     python3 scripts/protect_repo.py --check
 
 # 11. Upstream Template Synchronization & Onboarding
-finish-onboarding:
-    python3 scripts/onboard.py finish
+finish-onboarding *FLAGS:
+    python3 scripts/onboard.py finish {{ '{{' }} FLAGS {{ '}}' }}
 
 update-template:
-    @PREV_REF=$$(git log -1 --grep="Polyform-Template-Ref:" --format="%(trailers:key=Polyform-Template-Ref,valueonly)" 2>/dev/null || grep '^_commit:' .copier-answers.yml 2>/dev/null | cut -d' ' -f2 || echo "unknown")
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PREV_REF=$(git log -1 --grep="Polyform-Template-Ref:" --format="%(trailers:key=Polyform-Template-Ref,valueonly)" 2>/dev/null || true)
+    if [ -z "$PREV_REF" ]; then
+        PREV_REF=$(grep '^_commit:' .copier-answers.yml 2>/dev/null | cut -d' ' -f2 || echo "unknown")
+    fi
     uvx copier update --trust
-    @NEW_REF=$$(grep '^_commit:' .copier-answers.yml 2>/dev/null | cut -d' ' -f2 || echo "HEAD")
-    @python3 scripts/onboard.py rearm --from "$$PREV_REF" --to "$$NEW_REF"
+    NEW_REF=$(grep '^_commit:' .copier-answers.yml 2>/dev/null | cut -d' ' -f2 || echo "HEAD")
+    python3 scripts/onboard.py rearm --from "$PREV_REF" --to "$NEW_REF"

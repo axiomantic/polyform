@@ -101,9 +101,9 @@ Every Polyform project includes an active onboarding and migration protocol desi
    - Baseline toolchain checks (`just setup && just test && just lint && just check-secrets`).
    - Domain architecture interview (entities, module boundaries, invariants) to hydrate placeholder stubs in `AGENTS.md`.
    - Conditional feature configurations (such as choosing between GPU-only vs. all macOS CI for `gh-krun-runner`).
-3. Running **`just finish-onboarding`** deletes `ONBOARDING.md`, cleanly strips the banner from `AGENTS.md`, and creates a commit carrying the RFC 822 `Polyform-Template-Ref:` git commit trailer.
+3. Running **`just finish-onboarding`** deletes `ONBOARDING.md`, cleanly strips the banner from `AGENTS.md`, and creates a commit carrying the RFC 822 `Polyform-Template-Ref:` git commit trailer. (Pass `--no-commit` if you prefer to review staged changes and commit manually).
 
 ### Upgrade Migration Flow
 1. Running **`just update-template`** executes Copier's 3-way merge and automatically invokes `python3 scripts/onboard.py rearm --from <prev> --to <new>`.
-2. This restores `ONBOARDING.md` with version-bounded delta instructions and re-inserts the banner at line 1 of `AGENTS.md`.
-3. In the next agent session, the assistant identifies what changed between versions, interviews the operator only on newly added capabilities, and finalizes with `just finish-onboarding`.
+2. This inspects the working tree delta (`git diff` and conflict detection), generates a rich `ONBOARDING.md` upgrade playbook detailing modified files and version migration highlights, and re-inserts the banner at line 1 of `AGENTS.md`.
+3. In the next agent session, the assistant identifies what changed between versions, assists in resolving any merge conflicts, interviews the operator only on newly added capabilities, and finalizes with `just finish-onboarding`.

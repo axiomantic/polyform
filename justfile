@@ -52,5 +52,5 @@ check-protection:
     python3 scripts/protect_repo.py --check
 
 # 9. Upstream Template Synchronization & Onboarding
-finish-onboarding:
-    python3 scripts/onboard.py finish
+finish-onboarding *FLAGS:
+    python3 scripts/onboard.py finish {{ FLAGS }}
