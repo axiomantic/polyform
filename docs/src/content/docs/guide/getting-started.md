@@ -90,3 +90,20 @@ just update-template
 ```
 
 If you also want to change a facet on an existing project (for example, adding Python bindings to a pure Nim library), run `uvx copier update --trust` without `--defaults` (or pass `-d has_python=true -d python_bridge_strategy=naganim`).
+
+## 5. Active AI Onboarding & Upgrade Protocol
+
+Every Polyform project includes an active onboarding and migration protocol designed for AI coding assistants (Claude Code, Antigravity, OpenCode, Codex, Cursor):
+
+### Initial Bootstrap Hydration
+1. A fresh repository renders `ONBOARDING.md` and prepends an actionable banner to `AGENTS.md`.
+2. When an AI assistant opens the project, it reads `AGENTS.md`, detects the banner, and proactively guides the operator through:
+   - Baseline toolchain checks (`just setup && just test && just lint && just check-secrets`).
+   - Domain architecture interview (entities, module boundaries, invariants) to hydrate placeholder stubs in `AGENTS.md`.
+   - Conditional feature configurations (such as choosing between GPU-only vs. all macOS CI for `gh-krun-runner`).
+3. Running **`just finish-onboarding`** deletes `ONBOARDING.md`, cleanly strips the banner from `AGENTS.md`, and creates a commit carrying the RFC 822 `Polyform-Template-Ref:` git commit trailer.
+
+### Upgrade Migration Flow
+1. Running **`just update-template`** executes Copier's 3-way merge and automatically invokes `python3 scripts/onboard.py rearm --from <prev> --to <new>`.
+2. This restores `ONBOARDING.md` with version-bounded delta instructions and re-inserts the banner at line 1 of `AGENTS.md`.
+3. In the next agent session, the assistant identifies what changed between versions, interviews the operator only on newly added capabilities, and finalizes with `just finish-onboarding`.

@@ -1,0 +1,109 @@
+# Polyform Active Onboarding & Migration Protocol
+
+> [!IMPORTANT]
+> **For AI Coding Assistants (Claude Code, Antigravity, OpenCode, Codex, Cursor)**:
+> You are the primary developer assistant for this project. Execute the following sequential checklist with the operator.
+> Do NOT stop until all phases are complete, or until the operator explicitly confirms their preferences.
+> Once finished, run `just finish-onboarding` to delete this file, strip the onboarding banner from `AGENTS.md`, and commit the provenance trailer.
+
+---
+
+## Phase 1: Context Detection (Bootstrap vs. Upgrade)
+
+1. Determine whether this session is an **Initial Bootstrap** or an **Upgrade Migration**:
+   - Run:
+     ```bash
+     git log -1 --grep="Polyform-Template-Ref:" --format="%(trailers:key=Polyform-Template-Ref,valueonly)"
+     ```
+   - If no trailer is found, or if only initial scaffolding commits exist $\rightarrow$ **Initial Bootstrap** (Proceed to **Phase 2**).
+   - If a previous `Polyform-Template-Ref` is found (e.g. `v0.6.0`) $\rightarrow$ **Upgrade Migration** (Proceed to **Phase 3**).
+
+---
+
+## Phase 2: Initial Project Hydration (Bootstrap Only)
+
+1. **Verify Baseline Toolchain**:
+   Run the canonical verification suite to ensure a green out-of-the-box baseline:
+   ```bash
+   just setup && just test && just lint && just check-secrets
+   ```
+2. **Domain Architecture Interview**:
+   Ask the operator 3 brief questions before writing domain code:
+   - What are the primary domain abstractions, data models, or core entities?
+   - What is the module layout strategy (single-file CLI vs. multi-module package)?
+   - Are there specific domain invariants, naming rules, or external services to follow?
+3. **Hydrate `AGENTS.md`**:
+   - Replace placeholder entries (`| (add per project) | | |`) under `## Key Modules` with actual domain modules.
+   - Update `## Architecture Overview` with the project's real purpose.
+   - Populate `## Glossary` with domain terminology.
+   - Ensure generic template boilerplates are pruned in favor of project-specific guidelines.
+4. Proceed to **Phase 4: Conditional Feature Configuration**.
+
+---
+
+## Phase 3: Upgrade Delta Migration (Upgrade Only)
+
+1. **Inspect the Template Delta**:
+   - Check the template version transition:
+     ```bash
+     git log -1 -p .copier-answers.yml
+     ```
+   - Run `git diff HEAD~1` to review incoming template changes.
+2. **Identify Newly Introduced Capabilities**:
+   - **v0.5.0**: Gitleaks secret scanning, branch protection rulesets, and `just protect-repo` / `just check-protection`.
+   - **v0.6.0**: Bounded per-suite test runner (`runSuite` in `{{ package_name }}.nimble`). Ensure any custom test tasks use `runSuite`.
+   - **v0.7.0**: Ephemeral Apple Silicon GPU Runner (`gh-krun-runner`) profile, `just test-gpu`, and active onboarding protocol (`just finish-onboarding`).
+3. **Targeted Operator Interview**:
+   - Only interview the operator regarding *new* features or breaking convention changes introduced in the delta.
+   - Do NOT re-interview the operator on already-configured domain details.
+4. Proceed to **Phase 4: Conditional Feature Configuration**.
+
+---
+
+## Phase 4: Conditional Feature Configuration
+
+{%- if ci_gpu_runner == 'krun_apple_silicon' %}
+### Ephemeral Apple Silicon GPU Runner (`gh-krun-runner`) [Experimental / WIP]
+The project has enabled `ci_gpu_runner: krun_apple_silicon`.
+Ask the operator:
+> "We've enabled the self-hosted Apple Silicon runner profile (`gh-krun-runner`).
+> How would you like CI configured?
+> 1. **GPU-only workloads** (LLMs, Vulkan, ONNX) on local Mac microVMs; standard unit tests remain on GitHub Linux (`ubuntu-latest`). [Recommended]
+> 2. **GPU workloads + all macOS CI jobs** (replaces GitHub's 10x-billed macOS cloud runners with local Apple Silicon microVM execution).
+> 
+> *Note: This requires running the `gh-krun-runner` daemon locally on an Apple Silicon Mac, and that Mac must be booted for jobs to run.*"
+
+If the operator chooses option 2:
+- Update `.github/workflows/ci.yml` matrix from `macos-latest` to `[self-hosted, linux, arm64, gpu]`.
+{%- endif %}
+
+{%- if enable_momus_review %}
+### Momus AI PR Review (`.github/workflows/momus.yml`)
+Verify if the operator has configured `LLM_API_KEY` in GitHub repository/environment secrets:
+- Repository Secret: **Settings > Secrets and variables > Actions > LLM_API_KEY**
+- Or Environment Secret: create environment `code-review` and add `LLM_API_KEY`.
+{%- endif %}
+
+{%- if has_python %}
+### PyPI Publishing (`.github/workflows/cibuildwheel.yml`)
+If publishing wheels to PyPI, remind the operator to configure Trusted Publishing or `PYPI_API_TOKEN`.
+{%- endif %}
+
+{%- if has_typescript %}
+### npm Publishing
+If publishing npm packages, remind the operator to configure `NPM_TOKEN`.
+{%- endif %}
+
+---
+
+## Phase 5: Self-Destruction & Provenance Finalization
+
+Once all steps are completed and approved by the operator:
+1. Run canonical finalization recipe:
+   ```bash
+   just finish-onboarding
+   ```
+2. Verify that:
+   - `ONBOARDING.md` has been deleted.
+   - The `<!-- POLYFORM_ONBOARDING_START -->` banner has been cleanly removed from `AGENTS.md`.
+   - A clean git commit has been created with `Polyform-Template-Ref:` and `Polyform-Onboarded-At:` trailers.

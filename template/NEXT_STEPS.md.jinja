@@ -1,5 +1,11 @@
 # Next Steps for {{ project_name }}
 
+> [!TIP]
+> **Active AI Assistant Onboarding**: This project includes an active onboarding directive in `ONBOARDING.md` and `AGENTS.md`. You can ask your AI coding assistant (Claude Code, Antigravity, OpenCode, Codex, Cursor):
+> > *"Read ONBOARDING.md and help me configure this project."*
+> 
+> The assistant will verify toolchains, interview you to hydrate `AGENTS.md` with domain architecture, configure CI runner options, and run `just finish-onboarding` to finalize and commit the provenance trailer.
+
 Welcome to your newly scaffolded project! This repository was generated with **Polyform**{% if flavor and flavor != 'custom' %} (preset: `{{ flavor }}`){% endif %} configured with composable facets:
 - Nim: `{{ has_nim }}`
 - Python: `{{ has_python }}`{% if has_nim and has_python %} (bridge: `{{ python_bridge_strategy }}`){% endif %}

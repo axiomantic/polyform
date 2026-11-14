@@ -198,6 +198,13 @@ print("Renovate configuration validated successfully.")
   fi
 
   grep -q "update-template:" "${DEST}/justfile"
+  grep -q "finish-onboarding:" "${DEST}/justfile"
+  grep -q "finish-onboarding:" "${REPO_ROOT}/justfile"
+  grep -q "scripts/onboard.py rearm" "${DEST}/justfile"
+  test -f "${DEST}/ONBOARDING.md"
+  test -f "${DEST}/scripts/onboard.py"
+  test -x "${DEST}/scripts/onboard.py"
+  grep -q "<!-- POLYFORM_ONBOARDING_START -->" "${DEST}/AGENTS.md"
   grep -q "check-secrets:" "${DEST}/justfile"
   grep -q "check-secrets:" "${REPO_ROOT}/justfile"
   grep -q "protect-repo:" "${DEST}/justfile"
@@ -578,6 +585,37 @@ for wf in glob.glob("'"${DEST}"'/.github/workflows/*.yml"):
       test -d "${DEST}/docs/dist"
       test -f "${DEST}/docs/dist/index.html"
       echo ">>> [TEST] Documentation build passed and generated docs/dist."
+    fi
+
+    if [[ "${FIXTURE}" == "fixture-pure-nim" ]]; then
+      echo ">>> [TEST] Verifying active onboarding protocol lifecycle & self-destruction..."
+      # 1. Run finish-onboarding to test self-destruction and git trailer stamping
+      (cd "${DEST}" && just finish-onboarding)
+      test ! -f "${DEST}/ONBOARDING.md"
+      if grep -q "<!-- POLYFORM_ONBOARDING_START -->" "${DEST}/AGENTS.md"; then
+        echo "ERROR: AGENTS.md banner was not stripped by finish-onboarding" >&2
+        exit 1
+      fi
+      TRAILER_VAL=$(cd "${DEST}" && git log -1 --grep="Polyform-Template-Ref:" --format="%(trailers:key=Polyform-Template-Ref,valueonly)")
+      if [[ -z "${TRAILER_VAL}" ]]; then
+        echo "ERROR: Polyform-Template-Ref trailer was not recorded by finish-onboarding" >&2
+        exit 1
+      fi
+
+      # 2. Test upgrade re-arming
+      (cd "${DEST}" && python3 scripts/onboard.py rearm --from v0.6.0 --to v0.7.0)
+      test -f "${DEST}/ONBOARDING.md"
+      grep -q "<!-- POLYFORM_ONBOARDING_START -->" "${DEST}/AGENTS.md"
+      grep -q "v0.6.0 -> v0.7.0" "${DEST}/ONBOARDING.md"
+
+      # 3. Clean up again
+      (cd "${DEST}" && just finish-onboarding)
+      test ! -f "${DEST}/ONBOARDING.md"
+      if grep -q "<!-- POLYFORM_ONBOARDING_START -->" "${DEST}/AGENTS.md"; then
+        echo "ERROR: AGENTS.md banner was not stripped on re-armed finish-onboarding" >&2
+        exit 1
+      fi
+      echo ">>> [TEST] Active onboarding lifecycle verified cleanly (bootstrap -> trailer -> rearm -> finish)."
     fi
 
     # Canonical command surface check: 'just test' must pass cleanly

@@ -257,8 +257,8 @@ _tasks:
     printf "\033[1;36m======================================================================\033[0m\n"
     printf "  \033[1mNext Steps:\033[0m\n"
     printf "    1. cd %s\n" "{{ repo_name }}"
-    printf "    2. just setup\n"
-    printf "    3. just test\n"
+    printf "    2. Prompt your AI coding assistant to read ONBOARDING.md to configure this project.\n"
+    printf "       (Or run: just setup && just test, review ONBOARDING.md, and run just finish-onboarding)\n"
     printf "  \033[1;33mReview NEXT_STEPS.md for tailored checklists and CI secrets setup.\033[0m\n"
     printf "\033[1;36m======================================================================\033[0m\n\n"
     '

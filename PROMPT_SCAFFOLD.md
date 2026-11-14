@@ -144,3 +144,4 @@ Once verified green:
 2. Summarize repository layout and available `just` recipes (`just setup`, `just test`, `just lint`, `just check-secrets`, `just build`, `just update-template`).
 3. Note any required secrets (such as `LLM_API_KEY` for Momus PR reviews, or package registry tokens).
 4. If `ci_gpu_runner` was configured (`krun_apple_silicon`), remind the operator to review Section 5 in `NEXT_STEPS.md` for `gh-krun-runner` host daemon setup on Apple Silicon.
+5. Guide the operator through active domain onboarding: `ONBOARDING.md` is staged and linked at line 1 of `AGENTS.md`. After hydrating domain architecture and rules, execute `just finish-onboarding` to clean up and commit the `Polyform-Template-Ref:` provenance trailer.
