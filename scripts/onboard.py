@@ -8,13 +8,13 @@ Manages the self-destructing onboarding protocol for AI coding assistants:
           into AGENTS.md and generating a rich, actionable ONBOARDING.md upgrade playbook.
 """
 
+from __future__ import annotations
+
 import argparse
 import datetime
 import os
 import re
 import subprocess
-import sys
-from typing import Dict, List, Optional, Tuple
 
 BANNER_START = "<!-- POLYFORM_ONBOARDING_START -->"
 BANNER_END = "<!-- POLYFORM_ONBOARDING_END -->"
@@ -27,7 +27,7 @@ BANNER_TEXT = """<!-- POLYFORM_ONBOARDING_START -->
 <!-- POLYFORM_ONBOARDING_END -->"""
 
 # Curated catalog of upstream capabilities introduced across Polyform releases
-VERSION_HIGHLIGHTS: Dict[str, List[str]] = {
+VERSION_HIGHLIGHTS: dict[str, list[str]] = {
     "v0.5.0": [
         "**Secret Scanning**: Gitleaks integrated into GitHub Actions CI and local `just check-secrets`.",
         "**Branch Protection**: Automated GitHub ruleset enforcement via `just protect-repo` and `just check-protection`.",
@@ -91,7 +91,7 @@ def get_template_ref(repo_root: str) -> str:
     return "HEAD"
 
 
-def get_last_onboarded_ref(repo_root: str) -> Optional[str]:
+def get_last_onboarded_ref(repo_root: str) -> str | None:
     """Extract last recorded Polyform-Template-Ref git commit trailer."""
     res = subprocess.run(
         [
@@ -99,32 +99,34 @@ def get_last_onboarded_ref(repo_root: str) -> Optional[str]:
             "log",
             "-1",
             "--grep=Polyform-Template-Ref:",
-            '--format=%(trailers:key=Polyform-Template-Ref,valueonly)',
+            "--format=%(trailers:key=Polyform-Template-Ref,valueonly)",
         ],
         cwd=repo_root,
         capture_output=True,
         text=True,
+        check=False,
     )
     trailer = res.stdout.strip()
     return trailer if trailer else None
 
 
-def inspect_git_delta(repo_root: str) -> Tuple[List[str], List[str], List[str], List[str], str]:
+def inspect_git_delta(repo_root: str) -> tuple[list[str], list[str], list[str], list[str], str]:
     """Inspect working tree after copier update.
 
     Returns:
         (conflicts, modified, added, deleted, diff_stat)
     """
-    conflicts: List[str] = []
-    modified: List[str] = []
-    added: List[str] = []
-    deleted: List[str] = []
+    conflicts: list[str] = []
+    modified: list[str] = []
+    added: list[str] = []
+    deleted: list[str] = []
 
     res = subprocess.run(
         ["git", "status", "--porcelain"],
         cwd=repo_root,
         capture_output=True,
         text=True,
+        check=False,
     )
     for line in res.stdout.splitlines():
         if not line:
@@ -147,6 +149,7 @@ def inspect_git_delta(repo_root: str) -> Tuple[List[str], List[str], List[str], 
             cwd=repo_root,
             capture_output=True,
             text=True,
+            check=False,
         )
         if grep_res.returncode == 0:
             for match in grep_res.stdout.splitlines():
@@ -158,13 +161,14 @@ def inspect_git_delta(repo_root: str) -> Tuple[List[str], List[str], List[str], 
         cwd=repo_root,
         capture_output=True,
         text=True,
+        check=False,
     )
     diff_stat = stat_res.stdout.strip()
 
     return conflicts, modified, added, deleted, diff_stat
 
 
-def get_version_highlights_span(from_ref: str, to_ref: str) -> List[Tuple[str, List[str]]]:
+def get_version_highlights_span(from_ref: str, to_ref: str) -> list[tuple[str, list[str]]]:
     """Return applicable version highlights between from_ref and to_ref."""
     # Normalized versions sorted ascending
     known_versions = ["v0.5.0", "v0.6.0", "v0.7.0"]
@@ -173,9 +177,8 @@ def get_version_highlights_span(from_ref: str, to_ref: str) -> List[Tuple[str, L
     for ver in known_versions:
         # If from_ref is unknown or preceding, and to_ref is >= this version
         # We include it if it's new compared to from_ref
-        if from_ref != ver:
-            if ver in VERSION_HIGHLIGHTS:
-                applicable.append((ver, VERSION_HIGHLIGHTS[ver]))
+        if from_ref != ver and ver in VERSION_HIGHLIGHTS:
+            applicable.append((ver, VERSION_HIGHLIGHTS[ver]))
 
     return applicable if applicable else list(VERSION_HIGHLIGHTS.items())
 
@@ -202,6 +205,7 @@ def finish_onboarding(repo_root: str, no_commit: bool = False) -> None:
             ["git", "rev-parse", "--verify", "HEAD"],
             cwd=repo_root,
             capture_output=True,
+            check=False,
         ).returncode
         == 0
     )
@@ -216,6 +220,7 @@ def finish_onboarding(repo_root: str, no_commit: bool = False) -> None:
     diff_check = subprocess.run(
         ["git", "diff", "--cached", "--quiet"],
         cwd=repo_root,
+        check=False,
     )
     if diff_check.returncode == 0:
         print("Notice: No staged changes to commit after cleanup.")
@@ -223,7 +228,7 @@ def finish_onboarding(repo_root: str, no_commit: bool = False) -> None:
 
     ref = get_template_ref(repo_root)
     prev_ref = get_last_onboarded_ref(repo_root)
-    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    timestamp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     if not has_commits:
         action = "scaffold project and complete onboarding"
