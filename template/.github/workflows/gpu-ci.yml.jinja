@@ -1,0 +1,84 @@
+# Ephemeral Apple Silicon GPU Runner (gh-krun-runner) [Experimental / WIP]
+# Note: Active prototype undergoing initial validation.
+name: GPU CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: gpu-ci-{% raw %}${{ github.ref }}{% endraw %}
+  cancel-in-progress: true
+
+jobs:
+  gpu-tests:
+    name: MicroVM Apple Silicon GPU Tests
+    runs-on: [self-hosted, linux, arm64, gpu]
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Verify Vulkan Venus Hardware Node
+        run: |
+          echo "=== Verifying Hardware Node /dev/dri/renderD128 ==="
+          ls -la /dev/dri/renderD128
+          if command -v vulkaninfo >/dev/null 2>&1; then
+            vulkaninfo --summary
+          else
+            echo "vulkaninfo not present in guest PATH; checking render node permissions"
+            test -r /dev/dri/renderD128 && test -w /dev/dri/renderD128
+          fi
+{%- if has_nim %}
+
+      - name: Run Nim GPU Tests
+        run: |
+          echo "=== Running Nim GPU Tests ==="
+          if [ -f tests/test_gpu.nim ]; then
+            nim c -r -d:danger --mm:orc tests/test_gpu.nim
+          elif [ -f tests/t_gpu.nim ]; then
+            nim c -r -d:danger --mm:orc tests/t_gpu.nim
+          else
+            echo "No dedicated GPU test suite found (tests/test_gpu.nim or tests/t_gpu.nim). Verifying nimble check."
+            nimble check
+          fi
+{%- endif %}
+{%- if has_python %}
+
+      - name: Run Python GPU / ONNX Runtime Verification
+        run: |
+          echo "=== Running Python GPU / ONNX Tests ==="
+          python3 -c "
+          try:
+              import onnxruntime as ort
+              print('ONNX Runtime version:', ort.__version__)
+              print('Available Execution Providers:', ort.get_available_providers())
+          except ImportError:
+              print('onnxruntime not installed in environment; skipping provider check')
+          "
+          if [ -d tests_py ] && grep -qr "@pytest.mark.gpu" tests_py; then
+            uv run --with pytest pytest -m gpu tests_py
+          fi
+{%- endif %}
+
+      - name: Model Inference Benchmark (Optional / Read-Only /models)
+        run: |
+          echo "=== Checking Optional Host Models Mount (/models) ==="
+          if command -v llama-cli >/dev/null 2>&1; then
+            MODEL_FILE=$(find /models -maxdepth 2 -name "*.gguf" 2>/dev/null | head -n 1 || true)
+            if [ -n "$MODEL_FILE" ] && [ -f "$MODEL_FILE" ]; then
+              echo "Testing llama.cpp inference with model: $MODEL_FILE"
+              llama-cli -m "$MODEL_FILE" -p "Sanity check GPU compute." -n 16 -ngl 99 --log-disable
+            else
+              echo "No .gguf model found in /models. Checking llama-cli version banner:"
+              llama-cli --version
+            fi
+          else
+            echo "llama-cli not installed in guest image; skipping model benchmark"
+          fi

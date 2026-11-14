@@ -142,6 +142,29 @@ just check-protection
 - **Bindings Generator**: `scripts/generate_bindings.py`
 - **Tripwire Symbol Verification**: `tests/test_tripwire.nim`
 {%- endif %}
+{%- if ci_gpu_runner == 'krun_apple_silicon' %}
+### Ephemeral Apple Silicon GPU CI (`gh-krun-runner`) [Experimental / WIP]
+> [!WARNING]
+> **Experimental / WIP**: This runner profile is an active prototype currently undergoing initial validation.
+
+This project includes `.github/workflows/gpu-ci.yml` configured for isolated, zero-cost hardware acceleration:
+- **Runner Target**: `runs-on: [self-hosted, linux, arm64, gpu]`
+- **Dual Value Drivers**:
+  - **Eliminate macOS CI Minutes**: GitHub-hosted macOS runners are slow and consume 10x Actions billing multipliers. Local Apple Silicon microVMs eliminate cloud runner minute costs.
+  - **Local LLM / GPU Testing**: Metal-backed Vulkan 1.3 execution in guest Linux avoids cloud GPU surcharges for llama.cpp, GGUF models, and ONNX Runtime.
+- **Sealed MicroVM Sandbox**: Executes inside isolated Linux ARM64 microVMs powered by `krunkit` + Virtio-GPU Venus (`virglrenderer` + `MoltenVK`) exposing `/dev/dri/renderD128`.
+- **Egress & Host Isolation**: Network traffic routed via `gvproxy` dropping RFC 1918 / host LAN / loopback packets (outbound HTTPS only); zero host filesystem mounts; APFS CoW disk clones destroyed upon job completion.
+- **Prerequisite & Host Daemon Setup**:
+  - **IMPORTANT**: The host macOS Apple Silicon machine **must be booted and running** for self-hosted CI jobs to execute. If the Mac is offline or sleeping, queued jobs will wait in GitHub Actions until the runner comes online.
+  - To host this runner, configure `gh-krun-runner` (`https://github.com/axiomantic/gh-krun-runner`) on an Apple Silicon Mac:
+    ```bash
+    git clone https://github.com/axiomantic/gh-krun-runner.git
+    cd gh-krun-runner
+    make setup && make rootfs
+    # Edit /Users/Shared/gh-krun-runner/config.toml with repo token & labels
+    make install-service
+    ```
+{%- endif %}
 
 ---
 

@@ -54,6 +54,24 @@ test-ts:
 {%- endif %}
     npx vitest run
 {%- endif %}
+{%- if ci_gpu_runner == 'krun_apple_silicon' %}
+
+# Run GPU-accelerated tests
+test-gpu:
+{%- if has_nim %}
+    @if [ -f tests/test_gpu.nim ]; then \
+        nim c -r -d:danger --mm:orc tests/test_gpu.nim; \
+    elif [ -f tests/t_gpu.nim ]; then \
+        nim c -r -d:danger --mm:orc tests/t_gpu.nim; \
+    else \
+        echo "No dedicated GPU test suite found (tests/test_gpu.nim or tests/t_gpu.nim)."; \
+    fi
+{%- elif has_python %}
+    uv run --with pytest pytest -m gpu tests_py || uv run --with pytest pytest tests_py
+{%- else %}
+    @echo "No GPU test runner defined for current facets."
+{%- endif %}
+{%- endif %}
 
 # 3. Linter Execution
 lint:

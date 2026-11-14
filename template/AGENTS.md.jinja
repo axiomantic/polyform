@@ -86,6 +86,16 @@ Documentation lives in `docs/` using Astro + Starlight.
 API references are extracted automatically from Nim source code using `nimble docgen` (powered by `tools/docgen.nim`).
 Mermaid diagrams (` ```mermaid `) and image zooming are supported out of the box.
 {% endif %}
+{%- if ci_gpu_runner == 'krun_apple_silicon' %}
+
+### Ephemeral Apple Silicon GPU Runner Invariant [Experimental / WIP]
+*Note: This runner profile is an active prototype undergoing initial validation.*
+GPU-dependent and local macOS CI jobs (`.github/workflows/gpu-ci.yml`) MUST target `runs-on: [self-hosted, linux, arm64, gpu]`.
+NEVER configure cloud-hosted GPU runners or expensive GitHub-hosted macOS runners (10x billing multiplier) for these jobs.
+All standard non-GPU jobs (lint, unit tests, secrets scan) MUST remain on standard runners (`ubuntu-latest`).
+Operational prerequisite: the host Apple Silicon Mac must be booted with the `gh-krun-runner` daemon active for self-hosted jobs to execute.
+MicroVM execution provides complete sandbox isolation: `gvproxy` outbound HTTPS only (RFC 1918 blocked), ephemeral APFS CoW disk destroyed on exit, single-concurrency GPU mutex lock (`/tmp/gh-krun-gpu.lock`), and read-only host model weights (`/models`).
+{%- endif %}
 
 ## Glossary
 

@@ -51,3 +51,53 @@ Scaffolds `include/<package_name>.h` and `CMakeLists.txt`.
 
 ### 5. `has_embedded` (Freestanding RTOS & Bare-Metal Profile)
 Scaffolds `embedded.cfg` with standalone deterministic memory management (`--os:standalone --mm:arc --exceptions:goto --threads:off -d:useMalloc --header`), CMake freestanding C translation and static library targets in `CMakeLists.txt`, and sets `options = { embedded = true, strip_include_prefixes = ["include"] }` under `[[targets]]` in `headerkit.toml` for FreeRTOS, Zephyr (`west`), and bare-metal firmware targets.
+
+---
+
+## Hardware Acceleration: Ephemeral Apple Silicon GPU Runner (`gh-krun-runner`) [Experimental / WIP]
+
+> **Status: Experimental / WIP** — This runner profile is an active prototype currently undergoing initial validation.
+
+Repositories requiring machine learning, LLM inference (e.g. `llama.cpp`, GGUF models), ONNX Runtime Vulkan execution, or seeking to eliminate expensive GitHub-hosted macOS CI minutes can configure the optional **`ci_gpu_runner: "krun_apple_silicon"`** profile.
+
+### Core Value Drivers & Architectural Invariants
+
+```
+                             +------------------------------------------+
+                             |        macOS Host (Apple Silicon)        |
+                             |  +--------------------+                  |
+                             |  | Host Orchestrator  |<--- GitHub JIT   |
+                             |  | (gh-krun-runner)   |     API Tokens   |
+                             |  +---------+----------+                  |
+                             |            |                             |
+      Single-Concurrency Lock|            | [APFS CoW cp -c]            |
+      (/tmp/gh-krun-gpu.lock)|            v                             |
+                             |    +---------------+                     |
+                             |    | Linux MicroVM |                     |
+                             |    | (krunkit)     |                     |
+                             |    +-------+-------+                     |
+                             |            |                             |
+    +------------------------+------------+-------------+               |
+    |                        |                          |               |
+    v                        v                          v               v
+[Virtio-GPU Venus]     [Virtio-Net]               [Virtio-FS]      [Virtio-Blk]
+virglrenderer +        gvproxy                    Host /models     Ephemeral CoW
+MoltenVK (Metal)       (Outbound HTTPS Only)      (Read-Only)      disk.raw
+    |                        |                          |               |
++---|------------------------|--------------------------|---------------|---+
+| GUEST: /dev/dri/renderD128 eth0 (RFC 1918 Blocked)    /models         /   |
+| Vulkan 1.3 Compute         Outbound HTTPS Only        GGUF Weights    Wiped
++---------------------------------------------------------------------------+
+```
+
+1. **Dual Value Drivers**:
+   - **Eliminate macOS CI Runner Surcharges**: GitHub-hosted macOS runners are noticeably slow and incur a 10x per-minute billing multiplier. Ephemeral local microVM runners execute on Apple Silicon without cloud minute fees.
+   - **Zero Cloud GPU Surcharges**: Provides local Metal-backed Vulkan 1.3 GPU execution for ML/LLM workloads (`llama.cpp`, GGUF models, ONNX Runtime).
+2. **Operational Prerequisite**:
+   - The host macOS Apple Silicon machine **must be booted and running** with the `gh-krun-runner` daemon active for self-hosted CI jobs to execute. Queued jobs will wait in GitHub Actions until the runner comes online.
+3. **Strict `runs-on` Targeting**: Non-GPU jobs (linting, unit tests, secrets scan) MUST remain on standard GitHub-hosted runners (`ubuntu-latest`). Only GPU/macOS-dependent jobs target `runs-on: [self-hosted, linux, arm64, gpu]`.
+4. **Sealed MicroVM Sandbox**: Built on `krunkit` (Hypervisor.framework) + Virtio-GPU Venus (`virglrenderer` + `MoltenVK`) delivering guest Linux `/dev/dri/renderD128` with Vulkan 1.3 compute.
+5. **Network & Storage Isolation**: `gvproxy` blocks RFC 1918, host loopback, and LAN traffic, permitting outbound HTTPS only. Zero host root filesystem access is permitted; optional host model weights are mounted strictly read-only (`ro`).
+6. **Ephemeral JIT Runners & APFS CoW**: Base disk images are cloned in <50ms with `cp -c` and destroyed along with transient GitHub JIT runner tokens immediately upon job termination.
+7. **Host Single-Concurrency GPU Locking**: Host daemon serializes microVM launches using `/tmp/gh-krun-gpu.lock` to prevent Apple Silicon unified memory exhaustion.
+8. **Downstream Dev Surface**: Adds `just test-gpu` to the generated `justfile`.

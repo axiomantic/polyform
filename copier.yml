@@ -161,6 +161,18 @@ momus_base_url:
   default: "https://openrouter.ai/api/v1"
   when: "{{ enable_momus_review }}"
 
+ci_gpu_runner:
+  type: str
+  help: >-
+    Self-hosted Apple Silicon runner profile (gh-krun-runner) [Experimental / WIP].
+    Eliminates expensive GitHub Actions macOS minutes (10x billing multiplier) and cloud GPU fees
+    by running ephemeral Linux ARM64 microVMs with Metal/Vulkan GPU compute locally.
+    NOTE: Requires running the host daemon on a local macOS Apple Silicon machine that must be booted for CI jobs to run.
+  choices:
+    "None (Standard GitHub-hosted runners)": "none"
+    "Ephemeral Apple Silicon Runner [Experimental / WIP] (gh-krun-runner: local macOS/GPU CI, requires booted Mac host)": "krun_apple_silicon"
+  default: "none"
+
 license:
   type: str
   help: "Software license"
@@ -227,6 +239,9 @@ _exclude:
   # Momus review exclusion
   - "{% if not enable_momus_review %}.github/workflows/momus.yml{% endif %}"
   - "{% if not enable_momus_review %}.momus.yaml{% endif %}"
+
+  # GPU CI runner exclusion
+  - "{% if ci_gpu_runner != 'krun_apple_silicon' %}.github/workflows/gpu-ci.yml{% endif %}"
 
 # ----------------------------------------------------------------------
 # 7. Post-Copy Lifecycle Tasks

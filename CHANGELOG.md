@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Ephemeral Apple Silicon GPU Runner Profile (`gh-krun-runner`) [Experimental / WIP]:** Added optional `ci_gpu_runner` Copier intake option (`krun_apple_silicon`, default `none`) providing dedicated hardware-accelerated CI (`.github/workflows/gpu-ci.yml`) targeting `runs-on: [self-hosted, linux, arm64, gpu]`. Eliminates expensive GitHub Actions macOS minutes (10x billing multiplier) and cloud GPU runner billing by executing inside isolated Linux ARM64 microVMs on Apple Silicon hosts via `krunkit` + Virtio-GPU Venus (`virglrenderer` + `MoltenVK`) exposing `/dev/dri/renderD128` with Vulkan 1.3 compute. Notes operational prerequisite: host macOS Apple Silicon machine must be booted and running the daemon for CI jobs to execute. Enforces strict microVM sandbox boundaries (`gvproxy` network isolation with RFC 1918 dropped and outbound HTTPS only, APFS CoW ephemeral disk clones destroyed upon job completion, single-concurrency host GPU mutex locking, and read-only host model weights mounts). Added `test-gpu` recipe to downstream `justfile`, added intake heuristics to `PROMPT_SCAFFOLD.md`, and documented runner setup in `NEXT_STEPS.md`, `AGENTS.md`, and Starlight reference docs.
+
 ## [0.6.0] - 2026-11-12
 
 ### Added

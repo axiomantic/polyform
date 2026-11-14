@@ -47,3 +47,9 @@ All template variables are defined in [`copier.yml`](https://github.com/axiomant
 | **`momus_model`** | `str` | `enable_momus_review` | Model ID string | `"~anthropic/claude-sonnet-latest"` | Configures the LLM model identifier in `.momus.yaml`. |
 | **`momus_base_url`** | `str` | `enable_momus_review` | URL string | `"https://openrouter.ai/api/v1"` | Configures the OpenAI-compatible API endpoint in `.momus.yaml`. |
 | **`license`** | `str` | Always prompted | `"MIT"`, `"Apache-2.0"`, `"BSD-3-Clause"`, `"Unlicense"` | `"MIT"` | Renders `LICENSE` and license metadata across package manifests. |
+
+## 5. Hardware Acceleration & Ephemeral GPU Runners
+
+| Variable | Type | `when` Condition | Allowed Choices | Default | Effect on Generated Project |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`ci_gpu_runner`** | `str` | Always prompted | `"none"`, `"krun_apple_silicon"` | `"none"` | When set to `"krun_apple_silicon"`, renders `.github/workflows/gpu-ci.yml` targeting `runs-on: [self-hosted, linux, arm64, gpu]` powered by `gh-krun-runner` (`krunkit` + Virtio-GPU Venus + MoltenVK) **[Experimental / WIP]**. Eliminates expensive GitHub Actions macOS minutes (10x billing multiplier) and cloud GPU fees by running ephemeral microVMs with Metal/Vulkan compute locally. *NOTE: Requires running the host daemon on a local Apple Silicon Mac that must be booted for CI jobs to run.* Adds `just test-gpu` recipe to `justfile`. |

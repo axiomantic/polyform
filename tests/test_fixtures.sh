@@ -35,6 +35,7 @@ if [[ "${TARGET_FIXTURE}" == "all" ]]; then
     "fixture-nim-py"
     "fixture-nim-c"
     "fixture-embedded-nim"
+    "fixture-krun-gpu"
   )
 else
   FIXTURES=("${TARGET_FIXTURE}")
@@ -69,6 +70,7 @@ for FIXTURE in "${FIXTURES[@]}"; do
   TS_BRIDGE="none"
   PYTHON_BRIDGE="none"
   C_BINDING="none"
+  CI_GPU_RUNNER="none"
 
   case "${FIXTURE}" in
     fixture-pure-nim)
@@ -102,6 +104,10 @@ for FIXTURE in "${FIXTURES[@]}"; do
       C_BINDING="headerkit"
       HAS_EMBEDDED=true
       ;;
+    fixture-krun-gpu)
+      HAS_NIM=true
+      CI_GPU_RUNNER="krun_apple_silicon"
+      ;;
     *)
       echo "ERROR: Unknown fixture profile: ${FIXTURE}" >&2
       exit 1
@@ -119,6 +125,7 @@ for FIXTURE in "${FIXTURES[@]}"; do
     -d has_c_cpp="${HAS_C_CPP}"
     -d has_embedded="${HAS_EMBEDDED}"
     -d docs_engine="${DOCS_ENGINE}"
+    -d ci_gpu_runner="${CI_GPU_RUNNER}"
   )
 
   if [[ "${HAS_TYPESCRIPT}" == "true" && "${HAS_NIM}" == "true" ]]; then
@@ -218,6 +225,26 @@ assert "pull_request" in rule_types, "Missing pull_request rule"
   grep -q "secrets-scan:" "${REPO_ROOT}/.github/workflows/ci.yml"
   grep -q 'GITLEAKS_VERSION="8.24.0"' "${DEST}/.github/workflows/ci.yml"
   grep -q "gitleaks detect --verbose" "${DEST}/.github/workflows/ci.yml"
+
+  if [[ "${CI_GPU_RUNNER}" == "krun_apple_silicon" ]]; then
+    test -f "${DEST}/.github/workflows/gpu-ci.yml"
+    grep -q "runs-on: \[self-hosted, linux, arm64, gpu\]" "${DEST}/.github/workflows/gpu-ci.yml"
+    grep -q "renderD128" "${DEST}/.github/workflows/gpu-ci.yml"
+    grep -q "Experimental / WIP" "${DEST}/.github/workflows/gpu-ci.yml"
+    grep -q "cancel-in-progress: true" "${DEST}/.github/workflows/gpu-ci.yml"
+    grep -q "test-gpu:" "${DEST}/justfile"
+    grep -q "gh-krun-runner" "${DEST}/NEXT_STEPS.md"
+    grep -q "Experimental / WIP" "${DEST}/NEXT_STEPS.md"
+    grep -q "must be booted" "${DEST}/NEXT_STEPS.md"
+    grep -q "Ephemeral Apple Silicon GPU Runner Invariant" "${DEST}/AGENTS.md"
+  else
+    # Negative control: GPU CI workflow must not be generated when ci_gpu_runner is default (none)
+    test ! -f "${DEST}/.github/workflows/gpu-ci.yml"
+    if grep -q "test-gpu:" "${DEST}/justfile"; then
+      echo "ERROR: ${FIXTURE} justfile must not contain test-gpu when ci_gpu_runner is not enabled" >&2
+      exit 1
+    fi
+  fi
   grep -q "model: ~anthropic/claude-sonnet-latest" "${DEST}/.github/workflows/momus.yml"
   grep -q "base_url: https://openrouter.ai/api/v1" "${DEST}/.github/workflows/momus.yml"
   grep -q "only_collaborators: true" "${DEST}/.github/workflows/momus.yml"

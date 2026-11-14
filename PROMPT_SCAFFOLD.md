@@ -67,6 +67,7 @@ Inspect `copier.yml` parameters. Prompt the user for any missing parameters, or 
 | `enable_momus_review` | `bool` | `true` | Include Momus AI PR review workflow |
 | `momus_model` | `str` | `~anthropic/claude-sonnet-latest` | Model identifier for Momus review |
 | `momus_base_url` | `str` | `https://openrouter.ai/api/v1` | Momus API endpoint base URL |
+| `ci_gpu_runner` | `choice` | `none` | Self-hosted Apple Silicon runner profile (`none`, `krun_apple_silicon`) [Experimental / WIP] |
 | `license` | `choice` | `MIT` | `MIT`, `Apache-2.0`, `BSD-3-Clause`, `Unlicense` |
 
 #### Architectural Flavor Topologies:
@@ -74,6 +75,16 @@ Inspect `copier.yml` parameters. Prompt the user for any missing parameters, or 
 - **`nim_ts_wasm`**: Nim + TypeScript WebAssembly Bridge (ESM, Vite runtime, Vitest suite, npm packaging).
 - **`nim_python_wheel`**: Nim Native Python Wheel (`scikit-build-core`, CMake, ctypes, pytest).
 - **`headerkit_binding`**: HeaderKit C/C++ Binding Extension (`headerkit.toml`, FFI wrapper, symbol tripwire).
+
+#### Hardware Acceleration & Ephemeral Apple Silicon Runner Intake Heuristic:
+When interviewing the operator or evaluating requirements for a repository:
+1. **Dual Value Drivers**:
+   - **Cost Elimination & Speed for macOS CI**: GitHub-hosted macOS runners are notoriously slow and consume 10x Actions minute billing multipliers. Ephemeral local microVM runners execute on Apple Silicon without cloud runner minute penalties.
+   - **LLM / GPU Compute in CI**: Delivers guest Linux `/dev/dri/renderD128` with Vulkan 1.3 compute inside a microVM sealed from the host (`gvproxy` network isolation with RFC 1918 dropped and outbound HTTPS only, single-concurrency GPU lock `/tmp/gh-krun-gpu.lock`, and APFS CoW ephemeral disks destroyed upon job completion) for testing `llama.cpp`, GGUF models, ONNX Runtime, or computer vision without cloud GPU fees.
+2. **Operational Prerequisite**:
+   - Explicitly inform the operator: This runner profile requires running the `gh-krun-runner` daemon on a local macOS Apple Silicon machine, and that Mac must be powered on and booted for self-hosted CI jobs to execute (otherwise queued jobs will wait in GitHub Actions until the runner comes online).
+3. **Choice**: **`krun_apple_silicon`** ("Ephemeral Apple Silicon Runner [Experimental / WIP] (`gh-krun-runner` via `krunkit` + Virtio-GPU Venus)").
+- **Status**: Untested prototype in initial validation (Experimental / WIP). Ensures GPU/macOS jobs target `runs-on: [self-hosted, linux, arm64, gpu]`.
 
 ---
 
@@ -95,6 +106,7 @@ uvx copier copy --trust \
   -d enable_momus_review=<true|false> \
   -d momus_model="~anthropic/claude-sonnet-latest" \
   -d momus_base_url="https://openrouter.ai/api/v1" \
+  -d ci_gpu_runner="<none|krun_apple_silicon>" \
   -d license="<license>" \
   gh:axiomantic/polyform "<target_dir>"
 ```
@@ -131,3 +143,4 @@ Once verified green:
 1. Present `NEXT_STEPS.md` to the operator.
 2. Summarize repository layout and available `just` recipes (`just setup`, `just test`, `just lint`, `just check-secrets`, `just build`, `just update-template`).
 3. Note any required secrets (such as `LLM_API_KEY` for Momus PR reviews, or package registry tokens).
+4. If `ci_gpu_runner` was configured (`krun_apple_silicon`), remind the operator to review Section 5 in `NEXT_STEPS.md` for `gh-krun-runner` host daemon setup on Apple Silicon.
