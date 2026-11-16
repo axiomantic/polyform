@@ -53,7 +53,7 @@ jobs:
           enable-cache: true
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: "3.15"
       - name: Install nph and tools
         run: |
           nimble install -y nph@0.7.0
